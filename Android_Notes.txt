@@ -1,4 +1,4 @@
-1.TextView´úÂëÉèÖÃselector
+ï»¿1.TextViewä»£ç è®¾ç½®selector
  TextView.setTextColor(Context.getResources().getColorStateList(R.color.colorfile));
 
 2.
