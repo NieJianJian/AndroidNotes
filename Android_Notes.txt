@@ -1,4 +1,7 @@
 ﻿1.TextView代码设置selector
- TextView.setTextColor(Context.getResources().getColorStateList(R.color.colorfile));
+	TextView.setTextColor(Context.getResources().getColorStateList(R.color.colorfile));
 
-2.
+2.获得ScrollView滑动的距离
+	ScrollView.getScrollBy(); // 得到的范围是  0 - (ScrollView.getMeasureHeight() - ScrollView在屏幕占比高度);
+
+3.
