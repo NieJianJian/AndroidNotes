@@ -4,4 +4,7 @@
 2.获得ScrollView滑动的距离
 	ScrollView.getScrollBy(); // 得到的范围是  0 - (ScrollView.getMeasureHeight() - ScrollView在屏幕占比高度);
 
-3.
+3.部分机型中ImageView不能显示长图，显示空白
+	只有部分机型是这样，好像是有阀值，把长图裁成可以接受的范围，拼起来，放到ScrollView中，效果是一样的
+
+4.
