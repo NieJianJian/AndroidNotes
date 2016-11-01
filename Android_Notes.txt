@@ -7,4 +7,7 @@
 3.部分机型中ImageView不能显示长图，显示空白
 	只有部分机型是这样，好像是有阀值，把长图裁成可以接受的范围，拼起来，放到ScrollView中，效果是一样的
 
-4.
+4.动态设置文字颜色
+	// new Font("登录查看").color(Color.parseColor("#B79466")); // 不生效
+	// 下面这种方法才可以
+	new SpannableStringBuilder().append("【").append(new Font("登录查看").color(Color.parseColor("#B79466"))).append("可抵扣金额】");
