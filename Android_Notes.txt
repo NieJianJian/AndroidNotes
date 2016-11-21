@@ -18,6 +18,8 @@
 6.给double类型的整数，添加上两位小数，或者，直接将double类型只保留两位小数
 	doubel dd = 253.6823;
 	doubel da = 253;
-	DecimalFormat decimalFormat = new DecimalFormat("#.00");
+	// DecimalFormat decimalFormat = new DecimalFormat("#.00"); // 会出现".00"的情况 
+	// 将各位写成0，如果有数字，就替换掉，如果没有，避免出现".00"的情况。#是任意字符，可替换如果没有，就不显示
+	final DecimalFormat decimalFormat = new DecimalFormat("###,###,###,##0.00"); 
 	String str = decimalFormat.format(dd); // 253.68
 	String str = decimalFormat.format(dd); // 253.00
