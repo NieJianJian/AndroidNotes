@@ -11,3 +11,6 @@
 	// new Font("登录查看").color(Color.parseColor("#B79466")); // 不生效
 	// 下面这种方法才可以
 	new SpannableStringBuilder().append("【").append(new Font("登录查看").color(Color.parseColor("#B79466"))).append("可抵扣金额】");
+
+5.代码设置TextView背景透明
+	textView.setBackgroundColor(Color.argb(0, 255, 255, 255)); // params1：0-255，0表示完全透明，255表示完全不透明，如果是透明情况下，后面的rgb三个参数值设置什么都无所谓了
