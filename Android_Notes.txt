@@ -14,3 +14,10 @@
 
 5.代码设置TextView背景透明
 	textView.setBackgroundColor(Color.argb(0, 255, 255, 255)); // params1：0-255，0表示完全透明，255表示完全不透明，如果是透明情况下，后面的rgb三个参数值设置什么都无所谓了
+
+6.给double类型的整数，添加上两位小数，或者，直接将double类型只保留两位小数
+	doubel dd = 253.6823;
+	doubel da = 253;
+	DecimalFormat decimalFormat = new DecimalFormat("#.00");
+	String str = decimalFormat.format(dd); // 253.68
+	String str = decimalFormat.format(dd); // 253.00
