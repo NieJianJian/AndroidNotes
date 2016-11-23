@@ -23,3 +23,6 @@
 	final DecimalFormat decimalFormat = new DecimalFormat("###,###,###,##0.00"); 
 	String str = decimalFormat.format(dd); // 253.68
 	String str = decimalFormat.format(dd); // 253.00
+
+7.获取Activity所设置的view
+	((ViewGroup)getWindow.getDecorView.findViewById(android.R.id.content)).getChildAt(0);
