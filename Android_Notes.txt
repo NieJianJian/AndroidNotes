@@ -26,3 +26,9 @@
 
 7.获取Activity所设置的view
 	((ViewGroup)getWindow.getDecorView.findViewById(android.R.id.content)).getChildAt(0);
+
+8.杀死进程
+	android.os.Process.killProcess(android.os.Process.myPid());
+
+9.禁止button对所有英文字母进行大写转换
+	android:textAllCaps="false"
