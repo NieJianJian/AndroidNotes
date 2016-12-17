@@ -32,3 +32,7 @@
 
 9.禁止button对所有英文字母进行大写转换
 	android:textAllCaps="false"
+
+10.获取系统时间
+	SystemClock.elapsendRealTime(); // 获取系统开机至今所经历的毫秒数
+	SystemClock.currentTimeMillis(); // 获取到1910年1月1日0点至今所经历的毫秒数
