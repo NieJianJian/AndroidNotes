@@ -32,3 +32,11 @@
 
 9.禁止button对所有英文字母进行大写转换
 	android:textAllCaps="false"
+
+10.代码更新TextView的颜色方法
+	mEditText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+	mEditText.setTextColor(getResources().getColorStateList(android.R.color.holo_green_dark));
+	mEditText.setTextColor(Color.parseColor("#0000FF"));
+	mEditText.setTextColor(Color.RED);
+	mEditText.setTextColor(Color.rgb(255, 0, 0));
+	mEditText.setTextColor(0xFF00FF00);
