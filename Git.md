@@ -1,4 +1,4 @@
-## Git
+## Git命令
 
 • 创建本地仓库
 
@@ -128,12 +128,67 @@ q --- 退出
 ! --- 强制执行操作
 ```
 
-• 
+• 将本地数据push到远程服务器
 
-• 
+```
+git push [remote-name] [branch]
+例如 ： git push origin master
+```
 
-• 
+• 常见错误
 
-• 
+```
+【问题】 git pull 失败 ,提示：fatal: refusing to merge unrelated histories
+【原因】 其实这个问题是因为两个根本不相干的 git 库，一个是本地库，一个是远端库，然后本地要去推送到远端，远端觉得这个本地库跟自己不相干，所以告知无法合并
+【方案】方法一：是从远端库拉下来代码，本地要加入的代码放到远端库下载到本地的库，然后提交上去，因为这样的话，你基于的库就是远端的库，这是一次update了
+方法二：git pull origin master --allow-unrelated-histories 。
+后面加上 --allow-unrelated-histories ，把两段不相干的分支进行强行合并
+```
+
+• 查看系统当前git配置
+
+```
+// 初次安装git需要配置用户名和邮箱，否则git会提示：please tell me who you are.
+git config --global user.name "Niejj"
+git config --global user.email "niejian@163.com"
+
+// 查看当前的git配置
+git config --list
+// 结果如下
+user.name=Niejj							// 配置的名称
+user.email=niejian@163.com				// 配置的邮箱
+```
+
+•  ssh配置
+
+```
+1.检查是否存在ssh
+	终端输入命令：cd ~/.ssh
+2.生成默认参数得ssh
+	ssh-keygen -t rsa -C [your_email@youremail.com]  	// 注册Github时的email
+3.创建好之后，输入 ls 查看，应该有id_rsa.pub文件
+4.查看生成得公钥
+cat ~/.ssh/id_rsa.pub 
+
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0X6L1zLL4VHuvGb8aJH3ippTozmReSUzgntvk434aJ/v7kOdJ/MTyBlWXFCR+HAo3FXRitBqxiX1nKhXpHAZsMciLq8vR3c8E7CjZN733f5AL8uEYJA+YZevY5UCvEg+umT7PHghKYaJwaCxV7sjYP7Z6V79OMCEAGDNXC26IBMdMgOluQjp6o6j2KAdtRBdCDS/QIU5THQDxJ9lBXjk1fiq9tITo/aXBvjZeD+gH/Apkh/0GbO8VQLiYYmNfqqAHHeXdltORn8N7C9lOa/UW3KM7QdXo6J0GFlBVQeTE/IGqhMS5PMln3 admin@admin-PC
+
+5.将公钥添加到GitHub上
+1).登陆你的github帐户。点击你的头像，然后 Settings -> 左栏点击 SSH and GPG keys -> 点击 New SSH key
+2).然后你复制上面的公钥内容，粘贴进“Key”文本域内。 title域，自己随便起个名字。
+3).点击 Add key。
+
+6.验证key是否正常工作
+ssh -T git@github.com
+如果看到如下内容，说明成功了：
+Hi NieJianJian! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+参考链接：
+
+[https://www.jianshu.com/p/2a8559bffc1a] (https://www.jianshu.com/p/2a8559bffc1a)
+
+[https://www.cnblogs.com/cing/p/7742215.html] (https://www.cnblogs.com/cing/p/7742215.html)
+
+
 
 • 
