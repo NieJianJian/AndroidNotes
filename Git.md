@@ -185,9 +185,9 @@ Hi NieJianJian! You've successfully authenticated, but GitHub does not provide s
 
 参考链接：
 
-[https://www.jianshu.com/p/2a8559bffc1a] (https://www.jianshu.com/p/2a8559bffc1a)
+[Mac通过Terminal来使用Github] (https://www.jianshu.com/p/2a8559bffc1a)
 
-[https://www.cnblogs.com/cing/p/7742215.html] (https://www.cnblogs.com/cing/p/7742215.html)
+[利用git把本地项目传到github+将github中已有项目从本地上传更新] (https://www.cnblogs.com/cing/p/7742215.html)
 
 
 
