@@ -53,6 +53,7 @@ git add [file-name]  	// 添加指定文件
 
 ```
 git commit -m "[注释内容]"
+git commit -am "注释内容"		// 不执行git add，可以直接执行git commit -am操作
 ```
 
 • 查看状态
@@ -185,10 +186,9 @@ Hi NieJianJian! You've successfully authenticated, but GitHub does not provide s
 
 参考链接：
 
-[Mac通过Terminal来使用Github] (https://www.jianshu.com/p/2a8559bffc1a)
+[Mac通过Terminal来使用Github](https://www.jianshu.com/p/2a8559bffc1a)
 
-[利用git把本地项目传到github+将github中已有项目从本地上传更新] (https://www.cnblogs.com/cing/p/7742215.html)
-
-
+[利用git把本地项目传到github+将github中已有项目从本地上传更新](https://www.cnblogs.com/cing/p/7742215.html)
 
 • 
+
