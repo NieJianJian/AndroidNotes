@@ -46,14 +46,6 @@
 
 
 
-##2.集锦，收集了一些面试相关内容
-
-* [Java / Android 面试资料集锦，一个面试相关的集合](https://jingbin.me/2017/02/20/Android%20%E9%9D%A2%E8%AF%95%E8%B5%84%E6%96%99%E9%9B%86%E9%94%A6/)        最近更新: 2018-06-06
-* [Java / Android 也是一个面试相关的集合](https://github.com/Freelander/Blog/blob/master/2016/02.md)        最近更新: 2017-09-17
-* [知乎问题：怎么准备Android面试？有一些相关的总结](https://www.zhihu.com/question/37483907?sort=created)        最近更新: 最新的回答是5月份的，一共15个回答
-
-
-
 ## 3.简历
 
 - [Blankj简历参考 已通过阿里面试的markdown简历，教你用Markdown写简历](https://github.com/Blankj/resume)        最近更新: 2018-09-29
