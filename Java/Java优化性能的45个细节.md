@@ -427,47 +427,185 @@ array 数组效率最高，但容量固定，无法动态改变，ArrayList容�
 
 ***
 
+***
 
+***
 
+### 以下举几个使用的例子：
 
+#### 一、避免在循环条件中使用复杂表达式
 
+​        在不做编译优化的情况下，在循环中，循环条件会被反复计算，如果不使用复杂表达式，而使循环条件值不变的话，程序将会运行的更快。例子：
 
+```java
+import java.util.Vector;
+class CEL {
+    void method (Vector vector) {
+    for (int i = 0; i < vector.size (); i++) // Violation
+        ; // ...
+    }
+}
+```
 
+更正：
 
+```java
+class CEL_fixed {
+    void method (Vector vector) {
+    int size = vector.size ()
+    for (int i = 0; i < size; i++)
+        ; // ...
+    }
+}
+```
 
+***
 
+#### 二、为'Vectors' 和 'Hashtables'定义初始大小
 
+​        JVM为Vector扩充大小的时候需要重新创建一个更大的数组，将原原先数组中的内容复制过来，最后，原先的数组再被回收。可见Vector容量的扩大是一个颇费时间的事。
 
+通常，默认的10个元素大小是不够的。你最好能准确的估计你所需要的最佳大小。例子：
 
+```java
+import java.util.Vector;
+public class DIC {
+    public void addObjects (Object[] o) {
+        // if length > 10, Vector needs to expand
+        for (int i = 0; i< o.length;i++) {
+            v.add(o); // capacity before it can add more elements.
+        }
+    }
+    public Vector v = new Vector(); // no initialCapacity.
+}
+```
 
+更正：
 
+自己设定初始大小。
 
+```java
+public Vector v = new Vector(20);
+public Hashtable hash = new Hashtable(10);
+```
 
+***
 
+#### 三、在finally块中关闭Stream
 
+​        程序中使用到的资源应当被释放，以避免资源泄漏。这最好在finally块中去做。不管程序执行的结果如何，finally块总是会执行的，以确保资源的正确关闭。
 
+***
 
+#### 四、使用'System.arraycopy ()'代替通过来循环复制数组
 
+例子：
 
+```java
+public class IRB{
+    void method () {
+        int[] array1 = new int [100];
+        for (int i = 0; i < array1.length; i++) {
+            array1 [i] = i;
+        }
+        int[] array2 = new int [100];
+        for (int i = 0; i < array2.length; i++) {
+            array2 [i] = array1 [i]; // Violation
+        }
+    }
+}
+```
 
+更正：
 
+```java
+public class IRB{
+    void method () {
+        int[] array1 = new int [100];
+        for (int i = 0; i < array1.length; i++) {
+            array1 [i] = i;
+        }
+        int[] array2 = new int [100];
+        System.arraycopy(array1, 0, array2, 0, 100);
+    }
+}
+```
 
+***
 
+#### 五、让访问实例内变量的getter/setter方法变成”final”
 
+​        简单的getter/setter方法应该被置成final，这会告诉编译器，这个方法不会被重载，所以，可以变成”inlined”,例子：
 
+```java
+class MAF {
+    public void setSize (int size) {
+        _size = size;
+    }
+    private int _size;
+}
+```
 
+更正：
 
+```java
+class DAF_fixed {
+    final public void setSize (int size) {
+        _size = size;
+    }
+    private int _size;
+}
+```
 
+***
 
+#### 六、对于常量字符串，用'String' 代替 'StringBuffer'
 
+常量字符串并不需要动态改变长度。
 
+```java
+public class USC {
+    String method () {
+        StringBuffer s = new StringBuffer ("Hello");
+        String t = s + "World!";
+        return t;
+    }
+}
+```
 
+更正：把StringBuffer换成String，如果确定这个String不会再变的话，这将会减少运行开销提高性能。
 
+***
 
+#### 七、在字符串相加的时候，使用 ' ' 代替 " "，如果该字符串只有一个字符的话
 
+例子：
 
+```java
+public class STR {
+    public void method(String s) {
+        String string = s + "d" // violation.
+        string = "abc" + "d" // violation.
+    }
+}
+```
 
+更正：
 
+将一个字符的字符串替换成' '
+
+```java
+public class STR {
+    public void method(String s) {
+        String string = s + 'd'
+        string = "abc" + 'd'
+    }
+}
+```
+
+***
+
+​        ***注：***以上仅是Java方面编程时的性能优化，性能优化大部分都是在时间、效率、代码结构层次等方面的权衡，各有利弊，不要把上面内容当成教条，或许有些对我们实际工作适用，有些不适用，还望根据实际工作场景进行取舍，活学活用，变通为宜。
 
 
 
