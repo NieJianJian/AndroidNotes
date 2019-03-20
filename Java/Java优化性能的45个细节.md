@@ -46,10 +46,10 @@ public class A{
 
 ```java
 class MAF {
-		public void setSize (int size) {
-				_size = size;
-		}
-		private int _size;
+	public void setSize (int size) {
+		_size = size;
+	}
+	private int _size;
 }
 
 更正
