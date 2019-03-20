@@ -46,19 +46,19 @@ public class A{
 
 ```java
 class MAF {
-	public void setSize (int size) {
-		_size = size;
-	}
-  private int _size;
+　　public void setSize (int size) {
+　　　　_size = size;
+　　}
+　　private int _size;
 }
 
 更正
 
 class DAF_fixed {
-    final public void setSize (int size) {
-				_size = size;
-		}
-		private int _size;
+　　final public void setSize (int size) {
+　　　　_size = size;
+　　}
+　　private int _size;
 }
 ```
 
@@ -66,7 +66,7 @@ class DAF_fixed {
 
 ### 5. 尽量使用局部变量
 
-调用方法时传递的参数以及在调用中创建的临时变量都保存在栈（Stack）中，速度较快；其他变量，如静态变量、实例变量等，都在堆（Heap）中创建，速度较慢。
+　　调用方法时传递的参数以及在调用中创建的临时变量都保存在栈（Stack）中，速度较快；其他变量，如静态变量、实例变量等，都在堆（Heap）中创建，速度较慢。
 
 ***
 
