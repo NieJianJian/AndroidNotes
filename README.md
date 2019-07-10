@@ -1,4 +1,4 @@
-# Notes
+# Notes（$\color{red}{持续更新中…}$）
 
 ## Android基础
 
