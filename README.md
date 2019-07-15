@@ -10,6 +10,7 @@
 
 * [Java优化性能的45个细节](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/Java%E4%BC%98%E5%8C%96%E6%80%A7%E8%83%BD%E7%9A%8445%E4%B8%AA%E7%BB%86%E8%8A%82.md)
 * [Java反射](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/Java反射.md)
+* [代理模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/代理模式.md)
 
 ## 学习资料
 
