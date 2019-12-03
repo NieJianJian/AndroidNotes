@@ -31,6 +31,8 @@
 * **USER GUIDE**
 * **PREVIEW**
 
+* [各个版本下载地址](https://developer.android.google.cn/studio/archive?hl=zh-cn)
+
 
 
 ### 3.Google Play
