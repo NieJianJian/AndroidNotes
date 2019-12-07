@@ -18,6 +18,10 @@
 
 * [64K问题(MultiDex 分包)](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/64K问题-MultiDex分包.md)
 
+## 读书笔记
+
+* [深入理解Java虚拟机](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book1/README.md)
+
 ## 学习资料
 
 * [面试题库、GitHub资源整理](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/%E9%9D%A2%E8%AF%95%E9%A2%98%E5%BA%93%E3%80%81GitHub%E8%B5%84%E6%BA%90%E6%95%B4%E7%90%86.md)
