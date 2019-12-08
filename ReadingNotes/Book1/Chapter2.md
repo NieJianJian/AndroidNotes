@@ -2,7 +2,7 @@
 
 ### 1.Java虚拟机运行时数据区
 
-![](https://github.com/NieJianJian/AndroidNotes/blob/master/Picture/jvmruntimedata.jpg)
+![](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/jvmruntimedata.jpg)
 
 ### 1.1 程序计数器
 
@@ -125,20 +125,25 @@
 * 实例数据（Instance Data）：是对象真正存储的有效信息，也是在程序代码中所定义的各种类型的字段内容。无论时从父类继承下来的，还是在子类中定义的，都需要记录起来。
 * 对齐填充（Padding）：非必然存在。由于HotSpot VM的自动内存管理系统要求对象起始地址必须时8字节的整数倍，也就是对象的大小必须是8字节的整数倍。对象头时8字节的1倍或2倍，当对象实例数据部分没有对齐时，需要通过对齐填充来补全。
 
+***
+
 ### 2.3 对象的访问定位
 
 　　Java是通过栈上的reference数据来操作堆上的具体对象。但是reference类型只是虚拟机规范中规定指向一个对象的引用，并没有定义这个引用应该通过合众方式去定位、访问堆中的对象的具体位置，所以对象访问方式也是取决于虚拟机实现而定的。主流访问方式有使用句柄和直接指针两种。
 
 * 句柄：Java堆中将会划分处一块内存做为句柄池，reference中存储的就是对象的句柄地址，句柄中包含了包含了对象实例数据与类型数据各自的具体地址信息。
 
-  ![](https://github.com/NieJianJian/AndroidNotes/blob/master/Picture/handleaccessproject.png)
+  ![](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/handleaccessproject.png)
 
   * **好处**：reference中存储的是稳定的句柄地址，对象被移动时（垃圾收集时移动对象是非常普遍的行为）只会改变句柄中的实例数据指针，reference本身不需要修改。
 
 * 直接指针：Java堆对象的布局中就必须考虑如何放置访问类型数据的相关信息，而reference中存储的直接就是对象地址。
 
-  ![](https://github.com/NieJianJian/AndroidNotes/blob/master/Picture/directpointeraccessoobject.png)
+  ![](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/directpointeraccessoobject.png)
 
   * **好处**：速度快，节省一次指针定位的时间开销。
 
-![](/Users/niejianjian/git/AndroidNotes/Picture/handleaccessproject.png))　　
+***
+
+### 2.4 实战：OutOfMemoryError异常
+
