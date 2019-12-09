@@ -20,31 +20,91 @@
 
   Class文件格式如下表：
 
-|      类型      |        名称         |          数量          |
-| :------------: | :-----------------: | :--------------------: |
-|       u4       |        magic        |           1            |
-|       u2       |    minor_version    |           1            |
-|       u2       |    major_version    |           1            |
-|       u2       | constant_pool_count |           1            |
-|    cp_info     |    constant_pool    | constant_pool_count -1 |
-|       u2       |    access_flags     |           1            |
-|       u2       |     this_class      |           1            |
-|       u2       |     super_class     |           1            |
-|       u2       |  interfaces_count   |           1            |
-|       u2       |     interfaces      |    interfaces_count    |
-|       u2       |    fields_count     |           1            |
-|   field_info   |       fields        |      fields_count      |
-|       u2       |    methods_count    |           1            |
-|  method_info   |       methods       |     methods_count      |
-|       u2       |  attributes_count   |           1            |
-| attribute_info |     attributes      |    attributes_count    |
+|      类型      |        名称         |          数量          |       含义       |
+| :------------: | :-----------------: | :--------------------: | :--------------: |
+|       u4       |        magic        |           1            |       魔数       |
+|       u2       |    minor_version    |           1            |     次版本号     |
+|       u2       |    major_version    |           1            |     主版本号     |
+|       u2       | constant_pool_count |           1            | 常量池容量计数值 |
+|    cp_info     |    constant_pool    | constant_pool_count -1 |    常量池集合    |
+|       u2       |    access_flags     |           1            |     访问标志     |
+|       u2       |     this_class      |           1            |      类索引      |
+|       u2       |     super_class     |           1            |     父类索引     |
+|       u2       |  interfaces_count   |           1            |    接口计数器    |
+|       u2       |     interfaces      |    interfaces_count    |   接口索引集合   |
+|       u2       |    fields_count     |           1            |     字段数量     |
+|   field_info   |       fields        |      fields_count      |     字段集合     |
+|       u2       |    methods_count    |           1            |     方法数量     |
+|  method_info   |       methods       |     methods_count      |     方法集合     |
+|       u2       |  attributes_count   |           1            |     属性数量     |
+| attribute_info |     attributes      |    attributes_count    |     属性集合     |
 
 　　无论是无符号数还是表，当需要描述同一类型但数量不定的多个数据时，经常会使用一个前置的容量计数器加若干个连续的数据项的形式，这时称这一系列连续的某一类型的数据为某一类型的集合。
 
-　　<font color=#FF0000>***Class文件表中的数据项，无论是顺序还是数量，甚至于数据存储的字节序这样的细节，都是被严格选定的，哪个字节代表什么含义，长度是多少，先后顺序如何，都不想允许改变。***</font>
+　　<u></u><font color=#FF0000>***Class文件表中的数据项，无论是顺序还是数量，甚至于数据存储的字节序这样的细节，都是被严格选定的，哪个字节代表什么含义，长度是多少，先后顺序如何，都不想允许改变。***</font>
 
 ### 1.1 魔数与Class文件的版本
 
-　　每个Class文件的头4个字节称为魔数，用来确定这个文件是否为Class文件。值为：0xCAFEBABE。
+　　**魔数**：每个Class文件的头4个字节，用来确定这个文件是否为Class文件。值为：0xCAFEBABE。
 
-　　
+　　魔数后的4个字节存储的是Class文件的版本号：第5、6个字节是**次版本号**，第7、8个字节是**主版本号**。
+
+如下Class文件内容：
+
+```
+cafe babe 0000 0034 0013 0a00 0400 0f09
+...
+```
+
+　　开头4个字节的十六进制表示是0xcafebabe，代表次版本号的第5、6个字节值为0x0000，而主版本号的值为0x0034，也就是十进制的52。
+
+### 1.2 常量池
+
+　　紧接着主次版本号之后的就是常量池入口，它是Class文件结构中与其他项目关联最多的数据类型，也是占用Class文件空间最大的数据项目之一，还是Class文件中第一个出现的表类型数据项目。
+
+```
+cafe babe 0000 0034 0013 0a00 0400 0f09
+```
+
+　　如上所示，常量池容量（偏移地址：0x00000008）为十六进制数0x0013，即十进制的19，这代表常量池中有18项常量，索引值范围为1~18。设计者将第0项常量空出来是有特殊考虑的，这样做的目的在于满足后面某些指向常量池的索引值的数据在特定情况下需要表达"不引用任何一个常量池项目"的含义，这样就可以把索引值置为0来表示。**Class文件结构中只有常量池的容量计数是从1开始的**。
+
+常量池中主要存放两大类常量：字面量和符号引用。
+
+* 字面量：比较接近于Java语言层面的常量概念，如文本字符串、声明为final的常量值等
+* 符号引用：属于编译原理方面的概念，包括：
+  * 类和接口的全限定名
+  * 字段的名称和描述符
+  * 方法的名称和描述符
+
+　　Java嗲吗在进行Javac编译的时候，并不像C和C++那样有"连接"这一步骤，而是在虚拟机加载Class文件的时候进行动态连接。也就是说，在Class文件中不会保存各个方法、字段的最终内存布局信息，因此这些字段、方法的符号引用不经过运行期转换的话无法得到真正的内存入口地址，也就是无法直接被虚拟机使用。当虚拟机运行时，需要从常量池获得对应的符号引用，再在类创建时或运行时解析、翻译到具体的内存地址之中。
+
+　　常量池中每一项常量都是一个表，表开始的第一位是一个u1类型的标志位（tag），代表当前这个常量属于哪种常量类型。tag取值如下表：
+
+|               类型               | 标志 |           描述           |
+| :------------------------------: | :--: | :----------------------: |
+|        CONSTANT_Utf8_info        |  1   |    UTF-8编码的字符串     |
+|      CONSTANT_Integer_info       |  3   |        整型字面量        |
+|       CONSTANT_Float_info        |  4   |       浮点型字面量       |
+|        CONSTANT_Long_info        |  5   |       长整型字面量       |
+|       CONSTANT_Double_info       |  6   |    双精度浮点型字面量    |
+|       CONSTANT_Class_info        |  7   |    类或接口的符号引用    |
+|       CONSTANT_String_info       |  8   |     字符串类型字面量     |
+|      CONSTANT_Fieldref_info      |  9   |      字段的符号引用      |
+|     CONSTANT_Methodref_info      |  10  |    类中方法的符号引用    |
+| CONSTANT_InterfaceMethodref_info |  11  |   接口中方法的符号引用   |
+|    CONSTANT_NameAndType_info     |  12  | 字段或方法的部分符号引用 |
+|    CONSTANT_MethodHandle_info    |  15  |       表示方法句柄       |
+|     CONSTANT_MethodType_info     |  16  |       标识方法类型       |
+|   CONSTANT_InvokeDynamic_info    |  18  |  表示一个动态方法调用点  |
+
+常量池是最繁琐的数据，**因为这14种常量类型都有自己的结构**。具体内容自行搜索"**常量池中的14种常量项的结构总表**"。
+
+　　由于Class文件中方法、字段等都需要引用CONSTANT_Utf8_info型常量来描述名称，所以CONSTANT_Utf8_info型常量的最大长度也就是Java中方法、字段名的最大长度。而这里的最大长度就是length的最大值，CONSTANT_Utf8_info的length属性是一个u2类型的值，能表达的最大值为65535。所以**java程序中如果定义了超过64KB英文字符的变量或者方法名，将会无法编译**。
+
+### 1.3 访问标志
+
+　　**作用**：access_flag用于识别一些类或者接口层次的访问信息。包括：这个Class是类还是接口；是否定义为public；是否定义为abstract；如果类的话，是否被声明为final等。
+
+### 1.4 类索引、父类索引与接口索引集合　　
+
+　　Class文件通过类索引（this_class）、父类索引（super_class）、接口索引集合（interfaces）
