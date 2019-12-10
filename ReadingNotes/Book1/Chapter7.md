@@ -255,6 +255,37 @@ public static final int value = 123;
 
 　　上图展示的类加载器之间的这种层次关系，称为类加载器的**双亲委派模型**。双亲委派模型要求除了顶层的启动类加载器外，其余的加载器都应该有自己的父类加载器。
 
-　　
+　　**双亲委派模型的工作过程**：如果一个类加载器收到了类加载的请求，它首先不会自己去尝试加载这个类，而是把这个请求委派给父类加载器去完成，每一个层次的类加载器都是如此，因此所有的加载请求最终都应该传送到顶层的启动类加载器中，只有当父加载器反馈自己无法完成这个加载请求（找不到类）时，子加载器才会自己加载。
 
-　　
+　　**好处**：Java随着它的类加载器一起具备了一种带有优先级的层次关系。例如java.lang.Object，它存放在rt.jar之中，无论哪一个类加载器要加载这个类，最终都是委派给最顶端的启动类加载器进行加载，因此Object类在程序的各个类加载器环境中都是同一个类。　　
+
+　　实现双亲委派的代码都集中在java.lang.ClassLoader的loadClass()方法中。代码如下：
+
+```java
+protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+    // 1.先检查请求的类是否已经被加载过。
+    Class<?> c = findLoadedClass(name);
+    if (c == null) {
+        try {
+            // 2.若没有加载，调用父类加载器的loadClass()方法
+            if (parent != null) {
+                c = parent.loadClass(name, false);
+            } else {
+                // 3.若父类加载器为空则默认使用启动类加载器做为父类加载器
+                c = findBootstrapClassOrNull(name);
+            }
+        } catch (ClassNotFoundException e) {
+            // 如果父类加载器抛出异常，说明父类加载器无法完成加载请求
+        }
+        if (c == null) {
+            // 4.父类无法加载时，调用自身的findClass方法来进行类加载
+            c = findClass(name);
+        }
+    }
+    if (resolve) {
+        resolveClass(c);
+    }
+    return c;
+}
+```
+
