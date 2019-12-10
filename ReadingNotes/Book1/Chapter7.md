@@ -252,3 +252,9 @@ public static final int value = 123;
 * **应用程序类加载器**：由sun.misc.Launcher$AppClassLoader实现。由于这个类加载器是ClassLoader中的getSystemClasslLoader()方法的返回值，所以也称为系统类加载器。开发者可直接使用，如果应用程序中没有定义过自己的类加载器，一般情况下这个就是程序中**默认的类加载器**。
 
 ![](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/parentsdelegationmodel.png)
+
+　　上图展示的类加载器之间的这种层次关系，称为类加载器的**双亲委派模型**。双亲委派模型要求除了顶层的启动类加载器外，其余的加载器都应该有自己的父类加载器。
+
+　　
+
+　　
