@@ -98,10 +98,187 @@ placeholder能否被**回收的根本原因**是：局部变量表中的Slot是�
 
 ### 2.2 分派
 
+* 1.**静态分派**　　
 
+  * 方法静态分派演示，代码如下：
 
+    ```java
+    // 方法静态分派演示
+    public class StaticDispatch {
+        static abstract class Human { }
+        static class Man extends Human { }
+        static class Woman extends Human { }
+        public void sayHello(Human guy) {
+            System.out.println("hello guy!");
+        }
+        public void sayHello(Man guy) {
+            System.out.println("hello gentleman!");
+        }
+        public void sayHello(Woman guy) {
+            System.out.println("hello lady!");
+        }
+        public static void main(String[] args) {
+            Human man = new Man();
+            Human woman = new Woman();
+            StaticDispatch sr = new StaticDispatch();
+            sr.sayHello(man);   // 运行结果：hello guy!
+            sr.sayHello(woman); // 运行结果：hello guy!
+        }
+    }
+    ```
 
+    上述代码结果选择执行参数类型为Human的重载。
 
+    ```java
+    Human man = new Man();
+    ```
 
+    上面的代码，"Human"称为变量的**静态类型**，或叫做外观类型；"Man"称为变量的**实际类型**。静态类型的变化仅仅在使用时发生，变量本身的静态类型不会改变，最终的静态类型编译器可知；实际类型的变化结果运行期才确定。例如下面的代码：
 
-　　
+    ```java
+    // 实际类型变化
+    Human man = new Man();
+    man = new Woman();
+    // 静态类型变化
+    sr.sayHello((Man) man);
+    sr.sayHello((Woman) man);
+    ```
+
+    ***虚拟机（准确的说是编译器）在重载时是通过参数的静态类型而不是实际类型作为判定依据的。***
+
+    所有依赖静态类型来定位方法执行版本的分派动作称为**静态分派**。静态分派典型的应用就是方法重载。静态分派发生在*编译阶段*，因此确定静态分派的动作实际上不是由虚拟机来执行的。
+
+  * 重载方法匹配优先级
+
+    ```java
+    public class Overload {
+        public static void sayHello(Object arg) { // 6
+            System.out.println("hello Object");
+        }
+        public static void sayHello(int arg) { // 2
+            System.out.println("hello int");
+        }
+        public static void sayHello(long arg) { // 3
+            System.out.println("hello long");
+        }
+        public static void sayHello(Character arg) { // 4
+            System.out.println("hello Character");
+        }
+        public static void sayHello(char arg) { // 1
+            System.out.println("hello char");
+        }
+        public static void sayHello(char... arg) { // 7
+            System.out.println("hello char ...");
+        }
+        public static void sayHello(Serializable arg) { // 5
+            System.out.println("hello Serializable");
+        }
+        public static void main(String[] args) {
+            sayHello('a');
+        }
+    }
+    ```
+
+    代码中方法后的数字，代表了重载优先级。
+
+    * hello char：上面代码首先输出的是：hello char。，因为'a'是char类型。
+    * hello int：'a'除了可以代表字符串，还可以代表数字97（Unicode数值）
+    * hello long：97进一步转型为长整数97L。（char->int->long->float->double）
+    * hello Character：自动装箱，'a'被包装为它的封装类型java.lang.Character
+    * hello Serializable：java.lang.Serializable是java.lang.Character类实现的一个接口。char可以转型为int，但是Character不能转型为Integer，它只能转型为它实现的接口和父类。
+    * hello Object：char装箱后转型父类，有多个父类，将在继承关系中从下往上搜索。
+    * hello char ...：变长参数重载优先级最低。此时'a'被当做一个数组元素。在单个参数中能成立的自动转型，如char转型为int，在变长参数中是不成立的。
+
+    静态方法会在类加载器就进行解析，而静态方法也是可以拥有重载版本的，选择重载版本的过程也是通过静态分派完成的。
+
+* 2.**动态分派**
+
+  invoke执行的运行时解析过程大致分为以下几步：
+
+  * 1）找到操作数栈顶的第一个元素所指向的对象的实际类型，记做C。
+  * 2）如果在类型C中找到与常量中的描述符和简单名称都相符的方法，则进行访问权限校验，如果通过则返回这个方法的引用，查找过程结束；如果不通过，则返回java.lang.IllegalAccessError异常。
+  * 3）否则，按照继承关系从下往上依次对C的各个父类进行第2步的搜索和验证过程。
+  * 4）如果始终没找到何时的方法，则抛出java.lang.AbstractMethodError异常。
+
+  　　由于invokevirtual指令执行的第一步就是在运行期确定接收者的实际类型，所以两次调用中的invokevirtual指令把常量池中的类方法符号引用解析到了不同的直接引用上，这个过程就是Java语言中方法重写的本质。我们把这种运行期根据实际类型确定方法执行版本的分派过程称为**动态分派**。
+
+* 3.**单分派和多分派**
+
+  　　方法的接收者与方法的参数统称为方法的**宗量**。单分派是根据一个宗量对目标方法进行选择，多分派是根据多于一个宗量对目标方法进行选择。
+
+  　　编译阶段编译器的选择过程，也就是静态分派的过程。静态分派属于多分派类型。
+
+  　　运行阶段虚拟机的选择，也就是动态分派的过程。动态分派属于单分派类型。
+
+* 4.**虚拟机动态分派的实现**
+
+  　　由于动态分派非常频繁，为考虑性能问题，常用优化手段是为类在方法区中建立一个**虚方法表**（vtable，与此对应，在invokeinterface执行时会有接口方法表，itable），使用虚方法表索引来代替元数据查找。（优化手段除了虚方法表，还会使用内联缓存和守护内联两种手段）
+
+  　　虚方法表中存放着各个方法的实际入口地址。如果某个方法在子类中没有被重写，那么子类的虚方法表里面的地址入口是父类的相同方法的地址入口。如果子类重写了这个方法，子类方法表中的地址入口是子类实现版本的入口地址。
+
+  　　方法表一般在类加载的连接阶段进行初始化，准备了类的变量初始值后，虚拟机会把该类的方法表也初始化完毕。
+
+### 2.3 动态类型语言支持
+
+　　invokedynamic指令是JDK7 实现"动态类型语言"支持而进行的改进之一。
+
+* 1.**动态类型语言**
+
+  　　动态类型语言的关键特征是它的类型检查的主体过程是在运行期而不是编译期，编译期就进行类型检查过程的语言（如C++和Java等）就是最常用的静态类型语言。
+
+  　　举个例子来解释"类型检查"，如下代码：
+
+  ```java
+  obj.println("hello world"); // 这一行代码"没头没尾"是无法执行的
+  ```
+
+  　假设这行代码在Java中，且变量obj的静态类型是java.io.PrintStream，那么obj的实际类型必须是PrintStream的子类才是合法的。否则，即使obj所属的类有println(String)方法，但与PrintStream接口没有任何继承关系，代码依旧类型检查不合法。（ECMAScript中，无论obj是何种类型，只要类型的定义中包含println(String)方法，那就可以调用成功）
+
+  　　因为Java语言在编译期已将println(String)方法完整的符号引用（CONSTANT_InterfaceMethodref_info常量）生成出来，做为方法调用指令的参数存储到Class文件中，如下代码：
+
+  ```
+  invokevirtual #4; //Method java/io/PrintStream.println:(Ljava/lang/String;)V
+  ```
+
+  　　这个符号引用包含了此方法定义在哪个具体类型之中、方法的名字以及参数顺序、参数类型和方法返回值信息，通过这个引用，虚拟机可以翻译出这个方法的直接引用。
+
+  　　"变量无类型而变量值才有类型"这个特点也是动态类型语言的一个重要特征。
+
+* 2. **java.lang.invoke包**
+
+  　　这个包的主要目的是在之前单纯依靠符号引用来确定调用的目标方法这种方式以外，提供一种新的动态确定目标方法的机制，称为**MethodHandle**（类似于C/C++中的Function Pointer，或者C#的Delegate。将可以将函数做为参数传递）。
+
+  　　**MehodHandle演示代码**如下：
+
+  ```java
+  import java.lang.invoke.MethodHandle;
+  import java.lang.invoke.MethodHandles;
+  import java.lang.invoke.MethodType;
+  
+  public class MethodHandleTest {
+      static class ClassA {
+          public void println(String s) {
+              System.out.println(s);
+          }
+      }
+      public static void main(String[] args) throws Throwable {
+          Object obj = System.currentTimeMillis() % 2 == 0 ? System.out : new ClassA();
+          // 无论obj最终是哪个实现类，下面这局都能正确调用到println方法
+          getPrintlnMH(obj).invokeExact("icyfenix");
+      }
+      private static MethodHandle getPrintlnMH(Object receiver) throws Throwable {
+          // MethodType：代表"方法类型"，methodType(方法的返回值, 具体参数...);
+          MethodType mt = MethodType.methodType(void.class, String.class);
+          // lookup()作用是指定类中查找符合给定的方法名称、方法类型，并且符合调用权限的方法句柄
+          // 因为这里调用的是一个虚方法，按照Java语言的规则，方法第一个参数是隐式的，代表该方法的接收者，
+          // 也就是this指向的对象，这个参数以前是放在参数列表中进行传递的，现在由bindTo来完成
+          return MethodHandles.lookup().findVirtual(receiver.getClass(), "println", mt)
+                  .bindTo(receiver);
+      }
+  }
+  ```
+
+  　　
+
+* 3. 
+
