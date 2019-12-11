@@ -244,7 +244,7 @@ placeholder能否被**回收的根本原因**是：局部变量表中的Slot是�
 
   　　"变量无类型而变量值才有类型"这个特点也是动态类型语言的一个重要特征。
 
-* 2. **java.lang.invoke包**
+* 2.**java.lang.invoke包**
 
   　　这个包的主要目的是在之前单纯依靠符号引用来确定调用的目标方法这种方式以外，提供一种新的动态确定目标方法的机制，称为**MethodHandle**（类似于C/C++中的Function Pointer，或者C#的Delegate。将可以将函数做为参数传递）。
 
@@ -278,7 +278,94 @@ placeholder能否被**回收的根本原因**是：局部变量表中的Slot是�
   }
   ```
 
-  　　
+  　　方法getPrintlnMH中模拟了invokevirtual指令的执行过程。这个方法的返回值（MethodHandle对象）可以视为对最终调用方法的一个引用。调用方法可以用如下代码：
 
-* 3. 
+  ```java
+  void sort(List list, MethodHandle compare)
+  ```
+
+  MethodHandle的使用方法和效果与Reflection有众多相似之处，它们区别如下：
+
+  * Reflection和MethodHandle都是在模拟方法调用，但是Reflection是模拟代码层次的方法调用，MethodHandle是模拟字节码层次的方法调用。MethodHandle.lookup中的3个方法——findStatic()、findVirtual()、findSpecial()对应invokestatic、invokevirtual&invokeinterface、invokesepcial这几条字节码指令的执行权限校验行为。
+  * Reflection中的java.lang.reflect.Method对象远比MethodHandle中的java.lang.invoke.Methodhandle对象所包含的信息多。前者是方法在Java段的全面映像，包含了方法的签名、描述符、以及方法属性表中各种属性的java端标识方式，还包含运行执行权限等运行期信息。而后者仅仅包含与执行该方法相关的信息。Reflection是重量级，MethodHandle是轻量级。
+
+* 3.**invokedynamic指令**
+
+  　　某种程度上，invokedynamic指令与MethodHandle机制的作用是一样的。都是为了解决原有4条"invoke"指令方法分派固化在虚拟机之中的问题。
+
+  　　**每一处含有invokedynamic指令的位置都称作"动态调用点"**。这条指令的第一个参数不再是代表方法符号引用的CONSTANT_Methodref_info常量，而变为CONSTANT_InvokeDynamic_info常量。这个新常量中可以得到3项信息：引导方法、方法类型和名称。引导方法有固定参数，并且返回值是java.lang.invoke.CallSite对象，这个代表真正要执行的目标方法调用。
+
+  　　**invokedynamic指令演示**如下：
+
+  ```java
+  import java.lang.invoke.CallSite;
+  import java.lang.invoke.ConstantCallSite;
+  import java.lang.invoke.MethodHandle;
+  import java.lang.invoke.MethodHandles;
+  import java.lang.invoke.MethodType;
+  
+  public class InvokeDynamicTest {
+      public static void main(String[] args) throws Throwable {
+          INDY_BootstrapMethod().invokeExact("icyfenix");
+      }
+      public static void testMethod(String s) {
+          System.out.println("hellot String : " + s);
+      }
+      public static CallSite BootstrapMethod(MethodHandles.Lookup lookup,
+                                             String name, MethodType mt) throws Throwable {
+          return new ConstantCallSite(lookup.findStatic(InvokeDynamicTest.class, name, mt));
+      }
+      private static MethodType MT_BootstrapMethod() {
+          return MethodType.fromMethodDescriptorString(
+                  "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/" +
+                          "invoke/MethodType;)Ljava/lang/invoke/CallSite;", null);
+      }
+      private static MethodHandle MH_BootstrapMethod() throws Throwable {
+          return MethodHandles.lookup().findStatic(InvokeDynamicTest.class,
+                  "BootstrapMethod", MT_BootstrapMethod());
+      }
+      private static MethodHandle INDY_BootstrapMethod() throws Throwable {
+          CallSite cs = MH_BootstrapMethod().invokeWithArguments(MethodHandles.lookup(), "testMethod",
+                  MethodType.fromMethodDescriptorString("(Ljava/lang/String;)V", null));
+          return cs.dynamicInvoker();
+      }
+  }
+  ```
+
+  上述代码使用了一个把字节码转换为invokedynamic的简单工具**INDY**来完成，所以代码中的方法名称不能随意改动，更不能把几个方法合并到一起写，因为它们是要被INDY工具读取的。
+
+* 4.**掌控方法分派规则**
+
+  invokedynamic指令与前面4条"invoke"指令的最大差别就是它的分派逻辑不是由虚拟机来决定的，而是由程序员决定的。
+
+  ```java
+  public class Test {
+      class GrandFather {
+          void thinking() {
+              System.out.println("i am grandfather");
+          }
+      }
+      class Father extends GrandFather {
+          void thinking() {
+              System.out.println("i am father");
+          }
+      }
+      class Son extends Father {
+          void thinking() {
+              try {
+                  MethodType mt = MethodType.methodType(void.class);
+                  MethodHandle mh = MethodHandles.lookup().findSpecial(GrandFather.class,
+                          "thinking", mt, getClass());
+              } catch (Throwable e) {
+                  e.printStackTrace();
+              }
+          }
+      }
+      public static void main() {
+          (new Test().new Son()).thinking(); // 打印结果为：i am grandfather
+      }
+  }
+  ```
+
+  使用纯粹的Java语言，在Son类中是无法获取一个实际类型是GrandFather的对象引用，而invokevirtual指令的分派逻辑就是按照方法接收者的实际类型进行分派，这个逻辑是固化在虚拟机中，程序员无法改变。但是如上述代码，可以通过MehtodHandle来解决问题。
 
