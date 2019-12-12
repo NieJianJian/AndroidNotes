@@ -20,7 +20,7 @@
 
 ## 读书笔记
 
-* [深入理解Java虚拟机](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book1/README.md)
+* [深入理解Java虚拟机-JVM高级特性与最佳实践](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book1/README.md)
 
 ## 学习资料
 
