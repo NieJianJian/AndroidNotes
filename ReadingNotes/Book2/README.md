@@ -7,3 +7,7 @@
 * [第5章 so库热修复技术](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book2/Chapter5.md)
 * [第6章 其他优秀的热修复方法](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book2/Chapter6.md)
 
+***
+
+[Sophix方案比较](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book2/Sophix.md)
+
