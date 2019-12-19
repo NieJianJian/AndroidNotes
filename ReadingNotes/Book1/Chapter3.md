@@ -95,3 +95,198 @@
 
 ### 2.4 分代收集算法
 
+　　当前虚拟机的垃圾收集都采用"分代收集"算法。一般是把Java堆分为新生代和老年代。
+
+* 新生代中，每次垃圾收集时都发现有大批对象死去，只有少量存活，就选用复制算法，只需要付出少量存活对象的复制成本就可以完成升级。
+* 老年代中，因为帝乡存活率高、没有额外空间对它进行分配担保，就必须使用"标记—清理"或者"标记—整理"算法来进行回收。
+
+***
+
+### 3 HotSpot的算法实现
+
+### 3.1 枚举根节点
+
+　　以可达性分析中从 GC Roots 节点找引用链这个操作为例，可作为 GC Roots 的节点主要在全局性的引用（例如常量或类静态属性）与执行上下文（例如栈帧中的本地变量表）中，现在很多应用仅仅方法区就有数百兆，如果要逐个检查这里面的引用，那么必然会消耗很多时间。
+
+　　另外，可达性分析对执行时间的敏感还体现在 GC 停顿上，因为这项分析工作必须不可以出现分析过程中对象引用关系还在不断变化的情况，否则分析结果准确性就无法得到保证。这点是导致 GC 进行时必须停顿所有 Java 执行线程（Sun将这件事情称为"Stop The World"）的其中一个重要原因，即使是在号称（几乎）不会发生停顿的 CMS 收集器中，枚举根节点时也是必须要停顿的。
+
+　　由于目前的主流 Java 虚拟机使用的都是准确式 GC（即虚拟机可以知道内存中某个位置的数据具体是什么类型。），所以当执行系统停顿下来后，并不需要一个不漏地检查完所有执行上下文和全局的引用位置，虚拟机应当是有办法直接得知哪些地方存放着对象引用。
+
+　　在 HotSpot 的实现中，是使用一组称为 OopMap 的数据结构来达到这个目的的，在类加载完成的时候，HotSpot 就把对象内什么偏移量上是什么类型的数据计算出来，在 JIT 编译过程中，也会在特定的位置记录栈和寄存器中哪些位置是引用。这样， GC 在扫描时就可以直接得知这些信息了。
+
+### 3.2 安全点（Safepoint）
+
+　　在 OopMap 的协助下，HotSpot 可以快速且准确地完成 GC Roots 枚举，但一个很现实的问题随之而来：可能导致引用关系变化，或者说 OopMap 内容变化的指令非常多，如果为每一条指令都生成对应的 OopMap，那将会需要大量的额外空间，这样 GC 的空间成本将会变得很高。
+
+　　实际上，HotSpot 也的确没有为每条指令都生成 OopMap，前面已经提到，只是在“特定的位置”记录了这些信息，这些位置称为安全点，即程序执行时并非在所有地方都能停顿下来开始 GC ，只有在到达安全点时才能暂停。
+
+　　Safepoint 的选定既不能太少以致于 GC 过少，也不能过于频繁以致于过分增大运行时的负荷。所以安全点的选定基本上是以程序"是否具有让程序长时间执行的特征"为标准进行选定的——因为每条指令执行的时间都非常短暂，程序不太可能因为指令流太长这个原因而过长时间运行，"长时间执行"的最明显特征就是指令序列复用，例如方法调用、循环跳转、异常跳转等，所以具有这些功能的指令才会产生安全点。
+
+对于 Safepoint，另一个需要考虑的问题是如何在 GC 发生时让所有线程都“跑”到最近的安全点上再停顿下来。这里有两种方案可供选择：**抢先式中断**（Preemptive Suspension）和**主动式中断**（Voluntary Suspension）。
+
+* 抢先式中断不需要线程的执行代码主动去配合，在 GC 发生时，首先把所有线程全部中断，如果发现有线程中断的地方不在安全点上，就恢复线程，让它“跑”到安全点上。现在几乎没有虚拟机实现采用抢先式中断来暂停线程从而响应 GC 事件。　
+
+* 主动式中断的思想是当 GC 需要中断线程的时候，不直接对线程操作，仅仅简单地设置一个标志，各个线程执行时主动去轮询这个标志，发现中断标志为真时就自己中断挂起。轮询标志的地方和安全点是重合的，另外再加上创建对象需要分配内存的地方。
+
+### 3.3 安全区域（Safe Region）
+
+　　使用 Safepoint 似乎已经完美地解决了如何进入 GC 的问题，但实际情况却并不一定。Safepoint 机制保证了程序执行时，在不太长的时间内就会遇到可进入 GC 的Safepoint。但是，程序“不执行”的时候呢？
+
+　　所谓的程序不执行就是没有分配 CPU 时间，典型的例子就是线程处于 Sleep 状态或者 Blocked 状态，这时候线程无法响应 JVM 的中断请求，“走”到安全的地方去中断挂起，JVM 也显然不太可能等待线程重新被分配 CPU 时间。对于这种情况，就需要安全区域（Safe Region）来解决。
+
+　　**安全区域是指在一段代码片段之中，引用关系不会发生变化。**
+
+　　在这个区域中的任意地方开始 GC 都是安全的。我们也可以把 Safe Region 看做是被扩展了的 Safepoint。在线程执行到 Safe Region 中的代码时，首先标识自己已经进入了 Safe Region，那样，当在这段时间里 JVM 要发起 GC 时，就不用管标识自己为 Safe Region 状态的线程了。在线程要离开 Safe Region 时，它要检查系统是否已经完成了根节点枚举（或者是整个 GC 过程），如果完成了，那线程就继续执行，否则它就必须等待直到收到可以安全离开 Safe Region 的信号为止。
+
+***
+
+### 4 垃圾收集器
+
+### 4.1 GC日志
+
+　　每一种收集器的日志形式都是由它们自身的实现所决定的，换而言之，每个收集器的日志格式都可以不一样。但虚拟机设计者为了方便用户阅读，将各个收集器的日志都维持一定的共性，例如以下两段典型的 GC 日志：
+
+```
+　　33.125:[GC[DefNew:3324K-＞152K（3712K），0.0025925 secs]3324K-＞152K（11904K），0.0031680 secs]
+　　100.667:[Full GC[Tenured:0 K-＞210K（10240K），0.0149142secs]4603K-＞210K（19456K），[Perm:2999K-＞2999K（21248K）]，0.0150007 secs][Times:user=0.01 sys=0.00, real=0.02 secs]
+```
+
+　　最前面的数字`33.125：` 和 `100.667：` 代表了 GC 发生的时间，这个数字的含义是从 Java 虚拟机启动以来经过的秒数。
+
+　　GC 日志开头的 `[GC` 和 `[Full GC` 说明了这次垃圾收集的停顿类型，而不是用来区分新生代 GC 还是老年代 GC 的。如果有 `Full` ，说明这次 GC 是发生了 Stop-The-World 的，例如下面这段新生代收集器 ParNew 的日志也会出现 `[Full GC`（这一般是因为出现了分配担保失败之类的问题，所以才导致 STW）。如果是调用 System.gc() 方法所触发的收集，那么在这里将显示 `[Full GC（System）`。
+
+```
+[Full GC 283.736:[ParNew:261599K-＞261599K（261952K），0.0000288 secs]
+```
+
+　　接下来的 `[DefNew`、`[Tenured`、`[Perm` 表示 GC 发生的区域，这里显示的区域名称与使用的 GC 收集器是密切相关的，例如上面样例所使用的 Serial 收集器中的新生代名为 "Default New Generation"，所以显示的是 `[DefNew`。如果是 ParNew 收集器，新生代名称就会变为 `[ParNew`，意为 "Parallel New Generation"。如果采用 Parallel Scavenge 收集器，那它配套的新生代称为 `PSYoungGen`，老年代和永久代同理，名称也是由收集器决定的。
+
+　　后面方括号内部的 `3324K-＞152K（3712K）`含义是`GC 前该内存区域已使用容量` `-＞` `GC 后该内存区域已使用容量` `（该内存区域总容量）`。而在方括号之外的 `3324K-＞152K（11904K）` 表示 `GC 前 Java 堆已使用容量` `-＞` `GC 后 Java 堆已使用容量` `（Java 堆总容量）`。
+
+　　再往后，`0.0025925 secs` 表示该内存区域 GC 所占用的时间，单位是秒。有的收集器会给出更具体的时间数据，如 `[Times:user=0.01 sys=0.00，real=0.02 secs]` ，这里面的 user、sys 和 real 与 Linux 的 time 命令所输出的时间含义一致，分别代表用户态消耗的 CPU 时间、内核态消耗的 CPU 事件和操作从开始到结束所经过的墙钟时间（Wall Clock Time）。
+
+　　CPU 时间与墙钟时间的区别是，墙钟时间包括各种非运算的等待耗时，例如等待磁盘 I/O、等待线程阻塞，而 CPU 时间不包括这些耗时，但当系统有多 CPU 或者多核的话，多线程操作会叠加这些 CPU 时间，所以读者看到 user 或 sys 时间超过 real 时间是完全正常的。
+
+***
+
+### 5 内存分配与回收策略
+
+　　对象的内存分配，往大方向讲，就是在堆上分配，对象主要分配在新生代的Eden区上。少数情况下也可能会直接分配在老年代中，分配的规则并不是百分之百固定的，其细节取决于当前使用的是哪一种垃圾收集器组合，还有虚拟机中与内存相关的参数的设置。
+
+![](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/objectmemoryallocation.png)
+
+### 5.1 对象优先在Eden分配
+
+　　大多数情况下，对象在新生代 Eden 区中分配。当 Eden 区没有足够空间进行分配时，虚拟机将发起一次 Minor GC。
+
+　　虚拟机提供了`-XX:+PrintGCDetails`这个收集器日志参数，告诉虚拟机在发生垃圾收集行为时打印内存回收日志，并且在进程退出的时候输出当前的内存各区域分配情况。
+
+　　新生代Minor GC演示代码如下：
+
+```java
+private static final int_1MB=1024 * 1024；
+/**
+ *VM参数：-verbose:gc-Xms20M-Xmx20M-Xmn10M-XX:+PrintGCDetails
+ -XX:SurvivorRatio=8
+ */
+public static void testAllocation () {
+    byte[] allocation1, allocation2, allocation3, allocation4;
+    allocation1 = new byte[2 * _1MB];
+    allocation2 = new byte[2 * _1MB];
+    allocation3 = new byte[2 * _1MB];
+    allocation4 = new byte[4 * _1MB];//出现一次Minor GC
+}
+```
+
+　　运行结果：
+
+```
+[GC[DefNew:6651K-＞148K（9216K），0.0070106 secs]6651K-＞6292K（19456K），
+0.0070426 secs][Times:user=0.00 sys=0.00，real=0.00 secs]
+Heap
+def new generation total 9216K,used 4326K[0x029d0000，0x033d0000，0x033d0000）
+eden space 8192K，51%used[0x029d0000，0x02de4828，0x031d0000）
+from space 1024K，14%used[0x032d0000，0x032f5370，0x033d0000）
+to space 1024K，0%used[0x031d0000，0x031d0000，0x032d0000）
+tenured generation total 10240K,used 6144K[0x033d0000，0x03dd0000，0x03dd0000）
+the space 10240K，60%used[0x033d0000，0x039d0030，0x039d0200，0x03dd0000）
+compacting perm gen total 12288K,used 2114K[0x03dd0000，0x049d0000，0x07dd0000）
+the space 12288K，17%used[0x03dd0000，0x03fe0998，0x03fe0a00，0x049d0000）
+No shared spaces configured.
+```
+
+　　上方代码的 `testAllocation()` 方法中，尝试分配 3 个 2MB 大小和 1 个 4MB 大小的对象，在运行时通过`-Xms20M`、`-Xmx20M`、`-Xmn10M`这 3 个参数限制了 Java 堆大小为 20MB ，不可扩展，其中 10MB 分配给新生代，剩下的 10MB 分配给老年代。`-XX:SurvivorRatio=8`决定了新生代中 Eden 区与一个 Survivor 区的空间比例是 8:1，从输出的结果也可以清晰地看到 `eden space 8192K、from space 1024K、to space 1024K` 的信息，新生代总可用空间为 9216KB（Eden区+1个Survivor区的总容量）。
+
+　　执行 `testAllocation()` 中分配 allocation4 对象的语句时会发生一次 Minor GC，这次 GC 的结果是新生代 6651KB 变为 148KB ，而总内存占用量则几乎没有减少（因为 allocation1、allocation2、allocation3 三个对象都是存活的，虚拟机几乎没有找到可回收的对象）。
+
+　　这次 GC 发生的原因是给 allocation4 分配内存的时候，发现 Eden 已经被占用了 6MB，剩余空间已不足以分配 allocation4 所需的 4MB 内存，因此发生 Minor GC。GC 期间虚拟机又发现已有的 3 个 2MB 大小的对象全部无法放入 Survivor 空间（Survivor 空间只有 1MB 大小），所以只好通过分配担保机制提前转移到老年代去。
+
+　　这次 GC 结束后，4MB 的 allocation4 对象顺利分配在 Eden 中，因此程序执行完的结果是 Eden 占用 4MB（被allocation4占用），Survivor 空闲，老年代被占用 6MB（被allocation1、allocation2、allocation3占用）。通过 GC 日志可以证实这一点。
+
+* Minor GC 和 Full GC 有什么不一样吗？
+  * 新生代 GC（Minor GC）：指发生在新生代的垃圾收集动作，因为 Java 对象大多都具备朝生夕灭的特性，所以 Minor GC 非常频繁，一般回收速度也比较快。
+  * 老年代 GC（Major GC/Full GC）：指发生在老年代的 GC，出现了 Major GC，经常会伴随至少一次的 Minor GC（但非绝对的，在 Parallel Scavenge 收集器的收集策略里就有直接进行 Major GC 的策略选择过程）。Major GC 的速度一般会比 Minor GC 慢 10 倍以上。
+
+### 5.2 大对象直接进入老年代
+
+　　所谓的大对象是指，需要大量连续内存空间的 Java 对象，最典型的大对象就是那种很长的字符串以及数组（ byte[] 数组就是典型的大对象）。大对象对虚拟机的内存分配来说就是一个坏消息（特别是短命大对象，写程序的时候应当避免），经常出现大对象容易导致内存还有不少空间时就提前触发垃圾收集以获取足够的连续空间来“安置”它们。
+
+　　虚拟机提供了一个 `-XX:PretenureSizeThreshold` 参数，令大于这个设置值的对象直接在老年代分配。这样做的目的是避免在 Eden 区及两个 Survivor 区之间发生大量的内存复制。
+
+　　大对象直接进入老年代演示代码如下：
+
+```java
+private static final int_1MB=1024 * 1024；
+/**
+ *VM参数：-verbose:gc-Xms20M-Xmx20M-Xmn10M-XX:+PrintGCDetails-XX:SurvivorRatio=8
+ *-XX:PretenureSizeThreshold=3145728
+ */
+public static void testPretenureSizeThreshold () {
+    byte[] allocation;
+    allocation = new byte[4 * _1MB];//直接分配在老年代中
+}
+```
+
+　　运行结果如下：
+
+```
+Heap
+def new generation total 9216K,used 671K[0x029d0000，0x033d0000，0x033d0000）
+eden space 8192K，8%used[0x029d0000，0x02a77e98，0x031d0000）
+from space 1024K，0%used[0x031d0000，0x031d0000，0x032d0000）
+to space 1024K，0%used[0x032d0000，0x032d0000，0x033d0000）
+tenured generation total 10240K,used 4096K[0x033d0000，0x03dd0000，0x03dd0000）
+the space 10240K，40%used[0x033d0000，0x037d0010，0x037d0200，0x03dd0000）
+compacting perm gen total 12288K,used 2107K[0x03dd0000，0x049d0000，0x07dd0000）
+the space 12288K，17%used[0x03dd0000，0x03fdefd0，0x03fdf000，0x049d0000）
+No shared spaces configured.
+```
+
+　　执行以上代码中的 `testPretenureSizeThreshold()` 方法后，我们看到 Eden 空间几乎没有被使用，而老年代的 10MB 空间被使用了 40%，也就是 4MB 的 allocation 对象直接就分配在老年代中，这是因为 PretenureSizeThreshold 参数被设置为 3MB（就是 3145728，这个参数不能像 -Xmx 之类的参数一样直接写 3MB），因此超过 3MB 的对象都会直接在老年代进行分配。
+
+　　**注意：** PretenureSizeThreshold 参数只对 Serial 和 ParNew 两款收集器有效，Parallel Scavenge 收集器不认识这个参数，Parallel Scavenge 收集器一般并不需要设置。如果遇到必须使用此参数的场合，可以考虑 ParNew 加 CMS 的收集器组合。
+
+### 5.3 长期存活的对象将进入老年代
+
+　　为了识别哪些对象应该放在新生代，哪些对象应该放在老年代中，虚拟机给每个对象定义了一个对象年龄（Age）计数器。
+
+　　如果对象在 Eden 出生并经过第一次 Minor GC 后仍然存活，并且能被 Survivor 容纳的话，将被移动到 Survivor 空间中，并且对象年龄设为 1 。对象在 Survivor 区中每“熬过”一次 Minor GC，年龄就增加 1 岁，当它的年龄增加到一定程度（默认为 15 岁），就将会被晋升到老年代中。
+
+　　对象晋升老年代的年龄阈值，可以通过参数`-XX:MaxTenuringThreshold`设置。
+
+### 5.4 动态对象年龄判定
+
+　　为了能更好地适应不同程序的内存状况，虚拟机并不是永远地要求对象的年龄必须达到了MaxTenuringThreshold才能晋升老年代，如果在Survivor空间中相同年龄所有对象大小的总和大于Survivor空间的一半，年龄大于或等于该年龄对象就可以直接进入老年代，无需等到MaxTenuringThreshold中要求的年龄。
+
+### 5.5 空间分配担保
+
+　　在发生 Minor GC 之前，虚拟机会先检查老年代最大可用的连续空间是否大于新生代所有对象总空间，
+
+* 如果这个条件成立，那么 Minor GC 可以确保是安全的。
+
+* 如果不成立，则虚拟机会查看HandlePromotionFailure设置值是否允许担保失败。
+  * 如果允许，那么会继续检查老年代最大可用的连续空间是否大于历次晋升到老年代对象的平均大小。
+    * 如果大于，将尝试进行一次Minor GC，尽管这次Minor GC是有风险的
+    * 如果小于，或者HandlePromotionFailure设置不允许冒险，那这时也要改为进行一次Full GC。
+
+　　只要老年代的连续空间大于新生代对象总大小或者历次晋升的平均大小就会进行 Minor GC ，否则将进行 Full GC 。
