@@ -2,6 +2,8 @@
 
 　　Java堆和方法区里，一个接口中的实现类需要的内存可能不一样，一个方法的多个分支需要的内存也不一样，我们只有在程序处于运行期间才知道会创建哪些对象，这部分内存的分配和回收是动态的，**垃圾收集器关注的是这部分内存**。
 
+![](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/jvm_lajihuishou.png)
+
 ### 1 对象已死吗？
 
 　　堆里面几乎存放着Java世界中几乎所有的对象实例。
