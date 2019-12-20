@@ -20,3 +20,5 @@
 
 * [第12章 Java内存模型与线程](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book1/Chapter12.md)
 
+* [线程安全与锁优化](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book1/Chapter13.md)
+
