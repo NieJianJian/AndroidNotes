@@ -14,7 +14,7 @@
 
 　　**每一个Java方法在Art虚拟机中都对应一个ArtMethod，ArtMethod记录了这个Java方法的所有信息，包括所属类、访问权限、代码执行地址等。**（art/runtime/art_method.h）
 
-0　　**Andfix执行过程：**通过env->FromReflectedMethod，可以由Method对象得到这个方法所对应的ArtMethod的真正起始地址，然后强制转换成ArtMethod指针，将旧函数的所有成员变量替换为新函数的。
+　　**Andfix执行过程：**通过env->FromReflectedMethod，可以由Method对象得到这个方法所对应的ArtMethod的真正起始地址，然后强制转换成ArtMethod指针，将旧函数的所有成员变量替换为新函数的。
 
 ### 1.2 虚拟机调用方法的原理
 
