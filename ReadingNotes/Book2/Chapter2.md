@@ -347,5 +347,92 @@ memcpy(smeth, dmeth, sizeof(ArtMethod));
 
   　　一个资源ID肯定是`const final static`变量，此时恰好switch case语句被编译成packed-switch指令，所以这时候不做任何处理就会存在资源ID替换不完全的情况。所以只要修改smali反编译流程，碰到packed-switch指令强转为sparse-switch指令。`:pswitch_N`等相关标签指令也需要强转为`:sswitch_N`指令。然后做资源ID的暴力替换，然后再回编译smali为dex。再做类方法变更的检测。**反编译-资源ID替换-回编译**。
 
-### 2.7 泛型编译
+### 3.7 泛型编译
 
+* (1)**为什么需要泛型**
+
+  * Java中*泛型基本上完全在编译器中实现*，由编译器执行类型检查和类型腿短，然后生成普通的非泛型的字节码，就是虚拟机完全无法感知泛型存在。这种实现技术叫做**擦除**。编译器使用泛型类型信息保证类型安全，然后在生成字节码之前将其擦除。
+  * java5才引入泛型，所以扩展虚拟机指令集来支持泛型被认为是无法接受的，因为这会为Java厂商升级其JVM造成难以逾越的障碍。因此才用了可以完全在编译器中实现的擦除方法。
+
+  　　平时使用过程中，有时候会忘记强制类型转换，或者强转用错类型，然而由于语法上是可以的，所以编译器检查不出错误，因而执行时会发生`ClassCastException`，所以提出了泛型的解决方案：在编译时进行类型安全检测，允许程序员在编译时就能检测到非法的类型。
+
+* (2)**泛型类型擦除**
+
+  　　Java字节码中是不包含泛型中的类型信息的。使用泛型的时候加上的类型参数，编译器在编译的时候会去掉，这个过程就是**类型擦除**。所以`new T()`这样使用泛型编译不过，因为类型擦除会导致实际上是`new Object()`。
+
+* (3)**类型擦除与多态的冲突和解决**
+
+  ```java
+  class A<T> {
+      private T t;
+      public T get() { return t; }
+      public void set(T t) { this.t = t; }
+  }
+  class B extends A<Number> {
+      private Number t;
+      @Override
+      public Number get() { return t; }
+      @Override
+      public void set(Number t) { this.t = t; }
+  }
+  class C extends A {
+      private Number t;
+      @Override
+      public Number get() { return t; }
+      // @Override 不能写
+      public void set(Number t) { this.t = t; }
+  }
+  ```
+
+  `@Override`表名方法重写，重写的意思是子类中的方法与父类中的某一方法具有相同的方法名，返回类型和参数列表。但是基类A类型擦除后，set方法和B类的set方法参数不一样，理论上变成了重载。这样类型擦除和多态有了冲突。JVM采用了一个特殊的方法，来完成这项重写功能，那就是**桥接**。
+
+  > 子类中真正重写基类方法的是编译器自动合成的桥接方法。而类B定义的get和set方法上面的@Override不过是假象，桥接方法的内部实现是去调用自己重写的print方法而已。
+
+  方法的重载只能以方法参数而无法以返回类型作为函数重载的区分标准。所以虚拟机允许返回值类型不同方法同时存在，是因为虚拟机通过参数类型和返回类型共同来确定一个方法，所以编译器为了实现泛型的多态允许自己做这个看起来"不合法"的事情。
+
+* (4)**泛型类型转换**
+
+  　　编译器发现如果一个变量的申明加上泛型的话，编译器会自动加上`check-cast`类型转换，而不在需要在源码中进行强制类型转换，类型转换是编译器自动完成了。
+
+* (5)**热部署解决方案**
+
+  　　类型擦除中，如果由`B extends A`变成了`B extends A< Number>`，那么就可能会新增对应的桥接方法。此时新增方法，只能走冷部署。
+
+### 3.8 Lambda表达式编译
+
+Lambda表达式可能导致方法的增多和减少。
+
+* (1)**Lambda表达式编译规则**
+
+  　　函数式编程、闭包概念。函数式接口两个特征：它是一个接口，这个接口具有唯一的抽象方法；我们将同时满足这两个特性的接口称为函数式接口。如`java.lang.Runnable`和`java.util.Comparator`。
+
+  函数式接口和匿名内部类区别如下：
+
+  * 关键字this，匿名类的this关键字指向匿名类，而Lambda表达式的this指向包围Lambda表达式的类。
+  * 编译方式，Java编译器将Lambda表达式编译成类的私有方法，使用Java7的invokedynamic指令来动态绑定这个方法。Java编译器将匿名内部类编译成`外部类$数字编号`的新类。
+
+  以下是构建Android Dalvik可执行文件可用的两种工具键的对比：
+
+  * 旧版javac工具键：
+
+    javac（.java -> .class） -> dx（.class -> .dex）
+
+  * 新版Jack工具链（Java8）：
+
+    Jack（.java -> .jack -> .dex）
+
+### 3.9 访问权限检查对热替换的影响
+
+* (1)**类加载阶段父类/实现接口访问权限检查**
+
+  一个类的加载过程，必须经历resolve、link、init三个阶段，父类或实现接口权限控制检查主要在link阶段。
+
+  如果当前类的实现接口或父类是非public时，同时负责加载两者的classLoader不一样的情况下，直接return false。所以此时不做任何处理，将会在类加载阶段报错。
+
+* (2)**类校验阶段访问权限检查**
+
+  　　由于补丁类在单独的dex文件中，所以要加载这个dex的话，肯定要进行dexopt的，dexopt过程中会执行dvmVerifyClass校验dex中的每个类。方法调用链：dvmVerifyClass校验类 -> verifyMethod校验类中的每个方法 -> （dvmVerifyCodeFlow -> doCodeVerifyaction）对每个方法的逻辑进行校验 -> verifyInstruction。
+
+### 3.10 < clinit>方法
+
+热部署——不允许类结构变更以及不允许变更< clinit>方法。所以只能走冷启动。
