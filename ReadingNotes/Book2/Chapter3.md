@@ -139,3 +139,8 @@ class A {
 * 也不需要处理合成时方法数超了的情况
 * 对于dex的结构也不用进行破坏性重构。
 
+　　现在，合成完整dex的问题就简化为如何在基线包里面去掉补丁包中包含的所有类。[dex文件中的header结构和各个属性](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book2/source_code/DexHeader.md)。既然要去除dex中得类，最关心的应该是`class_defs`属性。
+
+　　我们并不需要把某个类得所有信息都从dex移出，仅仅是使得在解析这个dex得时候找不到这个类的定义就可以了。因此，**只要移除定义的入口，对于类的具体内容不进行删除，这样就可以最大限度的减少`offset`的修改**。
+
+* [如何去除dex中的类定义]()
