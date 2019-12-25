@@ -143,4 +143,193 @@ class A {
 
 　　我们并不需要把某个类得所有信息都从dex移出，仅仅是使得在解析这个dex得时候找不到这个类的定义就可以了。因此，**只要移除定义的入口，对于类的具体内容不进行删除，这样就可以最大限度的减少`offset`的修改**。
 
-* [如何去除dex中的类定义]()
+* [如何去除dex中的类定义](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book2/source_code/DexClassDef.md)
+
+### 3.3 对于Application的处理
+
+　　Application是整个App的入口，在进入到替换的完整dex之前，一定会通过Application的代码，然而，Application必然是在加载在原来的dex里面的。只有在补丁加载后使用的类，会在新的完整的dex里找到。所以，在补丁加载后，如果Application类使用到其他新dex里的类，如果Application被打上pre-verify标志，就会抛出异常。解决办法就是清除掉标志。
+
+类的标志位于[ClassObject](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book2/source_code/ClassObject.md)的`accessFlags`成员中。
+
+而pre-verify标志的定义是：
+
+```
+CLASS_ISPREVERIFIED = (1<<16) // class has been pre-verified
+```
+
+因此我们只需要在JNI层清除掉它即可：
+
+```
+classObj->acccessFlags &= ~CLASS_ISPREVERIFIED
+```
+
+这样，在`dvmResolveClass`中找到新dex里的类后，由于CLASS_ISPREVERIFIED标志被清空，就不会判断所在dex是否相同，从而避免抛出异常。
+
+* **Tinker的方案**：将自己的Appliction替换成`TinkerApplication`，并在初始化`TinkerApplication`时作为参数传入。在生命周期回调时通过反射的方式调用实际Application的相关回调逻辑。
+* **Amigo方案**：在编译过程中，自定义gradle插件将App的Appliction替换成Amigo自己的另一个Appliction，并将原来的Application的name保存起来，该修复的问题都修复完再调用之前保存的Application的`attach(Context)`，然后将它回调到loadedApk中，最后调用它的`onCreate()`，执行原有Application的逻辑。
+
+### 3.4 dvmOptResolveClass问题与对策
+
+　　清除标志方案中，如果入口Application是没有`pre-verified`的，反而有更大问题。
+
+　　Dalvik虚拟机如果发现某个类没有pre-verified，就会在初始化这个类时做Verify操作，将会扫描这个类的所有代码，在扫描过程中**对这个类代码里使用到的类**都进行`dvmOptResolveClass`操作。它会在解析的时候对使用到的类进行初始化，而这个逻辑是发生在Application类初始化的时候。此时补丁还没进行加载，所以就会提前加载原始dex中的类。接下来当补丁加载完毕后，当这些已经加载的类用到新dex中的类，并且又是pre-verified时就会报错。
+
+　　这里最大的问题是*无法把不定加载提前到dvmOptResolveClass之前，因为在一个App的生命周期里，没有可能到达比入口Application初始化更早的时期了*。问题常见于多dex，因为无法保证Application用到的类和它处于同个dex中。多dex情况下想要解决这个问题，有两种办法：
+
+* 让Application用到的所有非系统类都和Application位于同一个dex里，这样就可以保证pre-verified标志被打打上，避免进入dvmOptResolveClass，而在补丁加载完之后，我们再清除pre-verified标志，使得接下来使用其他类也不会报错。
+* 把Application里面除了热修复框架代码以外的其他代码都剥离开，单独提出放到一个其他类里面，这样使得Application不会直接用到过多非系统类，这样，保证这个单独拿出来的类和Application处于同一个dex的该类还是比较大的。如果想要更保险，Application可以采用反射方式访问这个单独类，这样就彻底把Application和其他类隔绝开了。
+
+　　第一种方法实现简单，因为Android官方multi-dex机制会自动将Application用到的类打包到主dex中，所以只要把热修复初始化放在attachBaseContext最前面就可以了。第二种方法繁琐，是在代码架构层面进行重新设置，但是可以一劳永逸的解决问题。
+
+***
+
+### 4 入口类与初始化时机的选择
+
+### 4.1 初始化时机
+
+　　冷启动完整修复方案，本质就是换掉整个原有的dex文件。但是热修复的初始化本身也是一段代码。必须调用到这段代码，热修复操作才能执行完整。因为调用到热修复的类，肯定是使用者自己的类，这个类是无法被修复的，并且只能存在于原始安装包的classed.dex中。如果要使热修复类之前使用的其他类最少，只能放在Application类入口中。
+
+　　真实的启动顺序是按照如下顺序进行的：
+
+* Application.attachBaseContext 
+* ContentProvider.onCreate
+* Application.onCreate
+* Activity.onCreate
+
+　　所以热修复放在attachBaseContext里面最好，但是也有很多现在，此时App申请的权限还没授予完成，所以会遇到无法访问网络之类的问题。因此，可以执行初始化，但是不能进行网络请求下载补丁。
+
+### 4.2 防不胜防的细节错误
+
+在进行初始化的时候，经常容易错误的提早引入其他类。
+
+```java
+public class SampleApplication extends Application {
+    LocalStorageUtil localStorageUtil = new LocalStorageUtil();
+
+    protected void attachBaseContext(Context base) {
+        CrashReport.initCrashReport(this);
+        SophixWrApper.init(this);
+        MultiDex.install(this);
+        localStorageUtil.init(this);
+    }
+    
+    public void onCreate(){
+        super.onCreate();
+        SophixWrApper.query();
+    }
+    
+    public LocalStorageUtil getLocalStorageUtil() {
+        return localStorageUtil;
+    }
+    
+    static private class SophixWrApper {
+        static void init(Application context){
+            final SophixManager instance = SophixManager.getInstance();
+            instance.setContext(context)
+                    .setAppVersion(BuildConfig.VERSION_NAME)
+                    .setPatchLoadStatusStub(new PatchLoadStatusListener() {
+                        @Override
+                        public void onLoad(final int mode,
+                                           final int code,
+                                           final String info,
+                                           final int handlePatchVersion){
+                            if(code == PatchStatus.CODE_LOAD_SUCCESS){
+                                MyLogger.i("", "");
+                            } else if (code == PatchStatus.CODE_LOAD_RELAUNCH){
+                                MyLogger.i("", "");
+                            }
+                        }
+                    });
+            instance.initialize();
+        }
+        static void query() {
+            SophixManager.getInstance().queryAndLoadNewPatch();
+        }
+    }
+}
+```
+
+上面代码容易出现的几个问题：
+
+* 1.  CrashReport.initCrashReport(this)在Sophix热修复初始化之前提早引入，必然是不行的。
+* 2. 虽然初始化确实是在attachBaseContext里，但是包装了一个SophixWrApper类，这回导致初始化之前提前引入类。因此初始化不可以包装在其他类中。
+* 3. 在setAppVersion的时候使用了BuildConfig类，这个BuildConfig类是Android编译期间动态生成的，也属于非系统类，如果这里使用就会提前加载。建议用PackageManager来获取版本号。
+* 4. 在回调类中使用了MyLogger，在回调状态的时候引用很可能热修复还未初始化完毕，因此需要换为系统类android.utils.log。
+* 5. LocalStorageUtil直接在声明处赋值了它的实例，这个赋值起始是隐式发生在对象构造函数中的，这个时候甚至早于attachBaseContext的，因此需要咋初始化之后才能赋值。
+* 6. MultiDex.install(this)调用放在了热修复初始化后，这样做虽然没有引入类的问题，但是可能导致后面热修复框架初始化的时候找不到其他不在主dex中的热修复框架内部类，因此需要把它提前到热修复初始化之前。而提早引入MultiDex类不会带来问题，因为在热修复初始化之后，再也没有调用这个MultiDex类的地方。
+* 7. super.attachBaseContext(base)必须加上，否则无法正常运行。
+
+### 4.3 入口类带来的修复限制
+
+　　如果修改了入口Application中直接使用的类的结果，可能会引起错位异常。如果某个类的某个方法，是根据方法索引来取得的，这时候类里面新增或减少方法，可能会导致索引错位。
+
+　　保证初始化在单独的入口类中进行，后面在用反射的方式替换为原有的Application。上面的代码案例中，可以把Sophix初始化相关逻辑移除，把初始化方法到了一个单独的SophixStubApplication类黄总，这个类作为AndroidManifest的入口替换掉原来的SampleApplicaiton类。
+
+```java
+public class SophixStubApplication extends SophixApplication {
+    // 此处SophixEntry应指定真正的Application，并且保证RealApplicationStub类名不被混淆。
+    @Keep
+    @SophixEntry(MyApplication.class)
+    static class RealApplicationStub {}
+
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+        initSophix(this);
+    }
+
+    private void initSophix(Application context){
+        String AppVersion = "0";
+        try {
+            AppVersion = this.getPackageManager()
+                    .getPackageInfo(this.getPackageName(), 0)
+                    .versionName;
+        } catch (Exception e){}
+        final SophixManager instance = SophixManager.getInstance();
+        instance.setContext(context)
+                .setAppVersion(AppVersion)
+                .setAesKey(null)
+                .setEnableDebug(false)
+                .setEnableFullLog()
+                .setPatchLoadStatusStub(new PatchLoadStatusListener() {
+                    @Override
+                    public void onLoad(final int mode,
+                                       final int code,
+                                       final String info,
+                                       final int handlePatchVersion){
+                        if(code == PatchStatus.CODE_LOAD_SUCCESS){
+                            Log.i("", "");
+                        } else if (code == PatchStatus.CODE_LOAD_RELAUNCH){
+                            Log.i("", "");
+                        }
+                    }
+                });
+        instance.initialize();
+    }
+}
+```
+
+开发者使用这种方式的进行初始化的时候：
+
+* 赋值这个SophixStubApplicaiton类到自己的项目中
+* 把AndroidManifest里面的Application指定为它
+* 设置SophixEntry为SampleApplication。
+
+Sophix运行步骤：
+
+* 先执行初始化逻辑
+* 初始化完成后，通过反射得到SophixStubApplication的静态内部类RealApplicationStub
+* 通过它的类注解SophixEntry得到真正的Application
+* 然后调用SamepleApplication的生命周期函数attachBaseContext、onCreate等，再进行替换
+
+其他热修复方案也有很多采用替换Application的方式，但是它们主要实现方式是在编译期间，通过gradle插件偷偷的把AndriodManifest中的入口Application替换掉。
+
+不侵入编译流程可以带来巨大好处：
+
+* 开发者在编译期间可以直接使用Android原生插件或自定义插件，不限于任何IDE和打包工具。
+* 当Android原生编译链升级时，不必对新版本gradle进行适配，也不会受到其他JVM平台新语言的加入（kotlin）的影响。
+* 直接作用于APK产物，稳定，无缝兼容。
+
+***
+
+**冷启动修复主要注意避免提前引入非系统API类**。
