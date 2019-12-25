@@ -73,3 +73,69 @@
 
 ### 2.1 重新认识多态
 
+　　**动态绑定**：实现多态的技术，是指在执行期间判断所引用对象的实际类型，根据其实际类型调用其相应的方法。多态一般指的是非静态非私有方法的多态，field和静态方法不具有多态性。
+
+　　在虚拟机中加载每个类都会为这个类生成一张`vtable`表，`vtable`表就是当前类的所有`virtual`方法的一个数组，当前类和所有继承父类的`public/protected/default`方法（可以被继承的方法）就是`virtual`方法，`private/static`方法不属于这个范畴，因为不能被继承。
+
+　　子类`vtable`的大小等于子类virtual方法数+父类vtable的大小。
+
+* 整体复制父类vtable到子类的vtable；
+* 遍历子类的virtual方法集合，如果方法原型一致，说明是重写父类方法，那么在相同索引位置处，子类重写方法覆盖掉vtable中父类的方法；
+* 若方法原型不一致，那么就把该方法添加到vtable的末尾。
+
+　　**从当前变量的引用类型而不是实际类型中查找，如果找不到，再去父类递归查找**。
+
+### 2.2 冷启动方案限制
+
+```java
+public class Demo {
+    public static void test_addMethod() {
+        A obj = new A();
+        obj.a_t2();
+    }
+}
+class A {
+    int a = 0;
+    // 新增a_t1方法
+    void a_t1() {
+        Log.d("Sophix", "A a_t1");
+    }
+    void a_t2() {
+        Log.d("Sophix", "A a_t2");
+    }
+}
+```
+
+　　修复后的APK新增了`a_t1()`方法，Demo类不做任何修复，`test_addMethod()`得到的结果竟然是`A a_t1`，说明`obj.a_t2`执行的是`a_t1`方法。在dex文件第一次加载的时候，会执行dexopt，dexopt有verify和optimize两个过程，optimize阶段，重写`invoke-virtual`为虚拟机内部指令`invoke-virtual-quick`，这个指令后面跟的**立即数就是该方法再`vtable`中的索引值**。
+
+　　`invoke-virtual-quick`效率明显比`invoke-virtual`更高，直接从实际类型的vtable中获取调用方法的指针，而忽略了dvmResolveMethod从变量的引用类型获取该方法再vtable索引ID的步骤，所以更高效。
+
+> obj.a_t2() 等价于 invoke-virtual-quick A.vtable[0]，这就是错误的原因。
+
+***
+
+### 3 Dalvik下完整dex方案的新探索
+
+### 3.1 冷启动类加载修复
+
+　　如果一个类直接引用到的所有非系统类都和该类再同一个dex中的话，那么这个类会被打上`CLASS_ISPREVERIFIED`标志。
+
+　　类似于QFix和Tinker这类插入dex的方案，最大的问题是**如何解决Dalvik虚拟机下类的pre-verify问题**？
+
+* QQ空间的处理方式是在每个类中插入一个来自其他dex的hack.class，由此让所有类都不满足pre-verify条件。
+* Tinker的方式是合成全量的dex文件，这样所有类都在全量dex中解决，从而消除类重复而带来的冲突。
+* QFix是获取虚拟机中某些底层函数，提前解析到所有补丁类。以此绕过pre-verify检查。
+
+　　**dex比较的最佳粒度，应该是类的维度**。
+
+### 3.2 一种新的全量Dex方案
+
+* 传统方案：完整的dex就是把原有的dex和补丁包里的dex重新合并成一个。
+* Sophix方案：原有基线包的dex中，去掉补丁中也有的类，补丁 + 去除补丁类的基线包，就是新App中的所有类了。
+
+　　和Android原生的multi-dex同理，基线包在去掉了补丁中的类后，原有需要发生变更的类就消除了，基线包dex里就只包含不变的类了。而这些不变的类在要用到补丁中的新类时会自动去找补丁dex，补丁包中的新类在需要用到不变的类是也会找到基线包dex的类，这样基线包里面不使用补丁类的类仍旧可以按照原有的逻辑odex，最大成都保证了dexopt的效果。优点如下：
+
+* 不需要像传统合成思路那样判断类的增加和修改情况
+* 也不需要处理合成时方法数超了的情况
+* 对于dex的结构也不用进行破坏性重构。
+
