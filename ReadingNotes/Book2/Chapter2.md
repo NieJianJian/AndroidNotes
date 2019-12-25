@@ -18,7 +18,7 @@
 
 ### 1.2 虚拟机调用方法的原理
 
-　　Android 6.0版本中，Art虚拟机中[ArtMethod结构](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book2/art_method.h.md)中，最重要的字段是entry_point_from_interprete_和
+　　Android 6.0版本中，Art虚拟机中[ArtMethod结构](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book2/source_code/art_method.h.md)中，最重要的字段是entry_point_from_interprete_和
 
 entry_point_from_quick_compiled_code_ 了，从名字可以看出来，它们就是方法的执行入口。**Java代码在Android中会编译为Dex Code**。
 
@@ -75,7 +75,7 @@ memcpy(smeth, dmeth, sizeof(ArtMethod));
 
   　　补丁中的类在访问同包名下的类时，会报出访问权限异常`java.lang.IllegalAccessError`。因为补丁包和原有的base包的ClassLoader不是同一个，所以两个类无法被判别为同包名。校验逻辑在`Class::IsInSamePackage`中（art/runtime/mirror/class.cc）。
 
-  　　知道了原因，只要设置新类的ClassLoader为原来类就可以了。而这一步同样不需要在JNI层构造底层的结构，只要通过反射进行设置。实现代码如下：
+    　　知道了原因，只要设置新类的ClassLoader为原来类就可以了。而这一步同样不需要在JNI层构造底层的结构，只要通过反射进行设置。实现代码如下：
 
   ```javca
   Field classLoaderField = Class.class.getDeclareField("classLoader");
