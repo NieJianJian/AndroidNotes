@@ -81,7 +81,7 @@ class ResTable {
 };
 ```
 
-**一个Android进程只包含一个ResTable**，ResTable的成员变量mPackageGroups就是所有解析过的资源包的集合。任何一个资源包中都含有resources.arsc，它记录了所有资源的ID分配情况，以及资源中的所有字符串。这些信息是以二进制数的方式存储。底层的AssetManager做的事就是解析这个文件，然后把相关信息存储到mPackageGroups里面。
+**一个Android进程只包含一个ResTable**（一个AssetManager对应一个ResTable），ResTable的成员变量mPackageGroups就是所有解析过的资源包的集合。任何一个资源包中都含有resources.arsc，它记录了所有资源的ID分配情况，以及资源中的所有字符串。这些信息是以二进制数的方式存储。底层的AssetManager做的事就是解析这个文件，然后把相关信息存储到mPackageGroups里面。
 
 ***
 
@@ -166,12 +166,6 @@ struct ResChunk_header
 
 ### 4 另辟蹊径的资源修复方案
 
-一个好的资源热修复方案是什么样？
-
-* 补丁包足够小（避免下发完整的补丁包）
-* 避免运行时占用很多资源（避免下发差量包运行时合成）
-* 不侵入打包流程（避免自行修改AAPT）
-
 ***新方案***
 
 > 构建一个package id为0x66的资源包，这个包只包含改变了的资源项，直接在原有AssetManager中addAssetPath这个包即可。
@@ -180,7 +174,7 @@ struct ResChunk_header
 * 对于减少资源，不使用它就可以了。
 * 对于修改资源，比如替换一张图片之类的情况。我们把它视为新增资源，在打入补丁的时候，代码在引用处也会做相应修改，也就是直接把原来使用旧资源ID的地方变为新ID。
 
-![图](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/sophix_patchpackage.png)
+![补丁包图](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/sophix_patchpackage.png)
 
 补丁包示意图如上，绿线表示新增资源，红线表示内容发生修改的资源，黑线表示内容没有变化，但是ID发生改变的资源，× 表示删除了资源。
 
@@ -239,4 +233,33 @@ setContentView(0x66020000);
 不用管他，不使用它就可以了。
 
 ### 4.4 对于type的影响
+
+上图中看到，由于`type0x01`的所有`attr`资源项没有变化，所以没有加入到补丁包，导致后面type的ID都向前移了一位。因此`Type String Pool`中的字符串也需要进行修正，这样才能使0x01的type指向drawable，而不是原来的attr。
+
+***
+
+### 5 更优雅的替换AssetManager
+
+* **Android L以后版本**，直接在原有AssetManager上应用补丁即可，不再需要反射，效率提高。
+* **Android KK及以下版本**，addAssetPath是不会加载资源的，必须重新构造一个新的AssetManager并加入补丁包中，再换掉原来的。
+
+调用`AssetManager.destory()`方法，将其置为Null，然后再调用`AssetManager.init()`重新初始化，添加原有资源以及patch中的资源。
+
+***
+
+### 6 一个意料之外的资源问题
+
+　　**起因**：WebView的初始化触发了相关资源的注入，因为系统直接构成新的ResourceImpl，替换掉了原先的ResourceImpl，而加载过补丁资源的AssetManager由于是通过ResourceImpl进行引用的，也一起被这次替换弄丢了。
+
+　　**解决方案**：反射修改了LoadedApk的mSplitResDirs字段，加入补丁资源。这样，后面生成ResourcesKey的时候就会把相应的资源设置到自己的mSplitResDirs里面。从而被构造到新的AssetManager中，并保留补丁资源。
+
+***
+
+### 本章小结
+
+Sophix的优势：
+
+* 不侵入打包，直接对比新旧资源即可产生补丁资源包（对比修改AAPT方式的实现）
+* 不必下发完整包，补丁包中只包含有变动的资源（对比Instant Run、Amigo等方式的实现）
+* 不需要在运行时合成完整包。不占用运行时计算和内存资源（对比Tinker的实现）
 
