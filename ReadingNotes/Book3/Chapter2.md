@@ -4,7 +4,7 @@
 
 流程图如下：
 
-<img src="https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/androidsystemloader.png" alt="Android系统启动流程图 " style="zoom:80%;" />
+<img src="https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/androidsystemloader.png" alt="Android系统启动流程图 " style="zoom:60%;" />
 
 * **1.启动电源以及系统启动**
 
@@ -175,7 +175,7 @@ import /init.${ro.zygote}.rc
 
 ### 2.2 Zygote进程启动过程介绍
 
-<img src="https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/zygotestartumlsequence.png" alt="Zygote进程启动过程的时序图 " style="zoom:50%;" />
+<img src="https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/zygotestartumlsequence.png" alt="Zygote进程启动过程的时序图 " style="zoom:40%;" />
 
 ```c++
 // @frameworks/base/cmds/app_process/app_main.cpp
