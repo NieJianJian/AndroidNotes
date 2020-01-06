@@ -260,3 +260,183 @@ ZygoteInit的[main](https://github.com/NieJianJian/AndroidNotes/blob/master/Read
 ### 3.1 Zygote处理SystemServer进程
 
 ![Zygote处理SystemServer进程的时序图](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/zygotedealSystemServer.png)
+
+* 在`ZygoteInit.java`的`startSystemServer`方法中启动了SystemServer进程。
+* `ZygoteInit.java`的`zygoteInit`方法中
+  * `ZygoteInit.nativeZygoteInit()`用来启动Binder线程池，保证与其他进程通信。
+  * 进入到`SystemServer`的`main`方法。
+
+* 进入`SystemServer`的`main`方法
+
+  * `RuntimeInit`的`applicationInit`方法中，调用了`invokeStaticMain`方法
+
+  * ```java
+    @frameworks/base/core/java/com/android/internal/os/RuntimeInit.java
+    private static void invokeStaticMain(String className, String[] argv, ClassLoader classLoader)throws Zygote.MethodAndArgsCaller {
+        Class<?> cl;
+        try {
+            // 通过反射得到SystemServer类
+            cl = Class.forName(className, true, classLoader); // 1
+        } catch (ClassNotFoundException ex) {
+            throw new RuntimeException(
+                    "Missing class when invoking static main " + className, ex);
+        }
+        Method m;
+        try {
+            // 找到SystemServer的main方法
+            m = cl.getMethod("main", new Class[] { String[].class }); // 2
+        } catch (NoSuchMethodException ex) {
+            throw new RuntimeException("Missing static main on " + className, ex);
+        } catch (SecurityException ex) {
+            throw new RuntimeException("Problem getting static main on " + className, ex);
+        }
+        int modifiers = m.getModifiers();
+        if (! (Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers))) {
+            throw new RuntimeException("Main method is not public and static on " + className);
+        }
+        throw new Zygote.MethodAndArgsCaller(m, argv); // 3
+    }
+    ```
+
+    * 注释1处`className`为`com.android.server.SystemServer`，通过反射得到`SystemServer`类。
+    * 注释2处找到`SystemServer`中的`main`方法。
+    * 注释3处将找到的main方法传入`MethodAndArgsCaller`异常并抛出该异常。
+      * 捕获该异常的代码在`ZygoteInit.java`的`main`方法中，这个`main`方法会调用SystemServer的main方法。
+      * **为什么不直接调用而选择抛出异常？**因为这种抛出异常的处理会清除所有的设置过程需要的堆栈帧，并让SystemServer的mian方法看起来像是SystemServer进程的入口方法。
+
+### 3.2 解析SystemServer进程
+
+`SystemServer`的`main`方法中，只调用了[`run`](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book3/source_code/SystemServer.java.md)方法。`run`方法中：
+
+* 加载动态库`libandroid_servers.so`。
+* 创建`SystemServiceManager`，用于对系统服务进行创建、启动和生命周期管理。
+* 启动引导服务、核心服务、其他服务等。这些服务的父类都是`SystemService`。([表：部分系统服务及其作用](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book3/table_systemservice.md))
+
+### 3.3 SystemServer进程总结
+
+SystemServer进程被创建后，主要做了如下工作：
+
+* 启动Bindre线程池，这样就可以与其他进程进行通信
+* 创建`SystemServiceManager`，用于对系统服务进行创建、启动和生命周期管理。
+* 启动各种系统服务。
+
+***
+
+### 4 Launcher启动过程
+
+　　Launcher在启动过程中会请求PackageManagerService返回系统中已经安装的应用程序的信息，并将这些信息封装成一个快捷图标列表显示在系统屏幕上。Launcher作用主要是以下两点：
+
+* (1) 作为Android系统的启动器，用于启动应用程序
+* (2) 作为Android系统的桌面，用于显示和管理应用程序的快捷图标或者其他桌面组件。
+
+### 4.1 Launcher启动过程介绍
+
+　　SystemServer进程启动过程中会启动PackageManagerService，PMS启动后会将系统中的应用安装完成。
+
+![Launcher启动过程时序图](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/launcherstartprocess.png)
+
+启动Launcher的入口是AMS的`systemReady`方法，经过一系列调用后，回到了AMS的`startHomeActivityLocked`方法中。实现代码如下：
+
+```java
+boolean startHomeActivityLocked(int userId, String reason) {
+    //判断系统的运行模式和mTopAction的值
+    if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL
+            && mTopAction == null) { // 1
+        return false;
+    }
+    // 获取Luncher启动所需要的Intent
+    Intent intent = getHomeIntent(); // 2
+    ActivityInfo aInfo = resolveActivityInfo(intent, STOCK_PM_FLAGS, userId);
+    if (aInfo != null) {
+        intent.setComponent(new ComponentName(aInfo.applicationInfo.packageName, aInfo.name));
+        aInfo = new ActivityInfo(aInfo);
+        aInfo.applicationInfo = getAppInfoForUser(aInfo.applicationInfo, userId);
+        ProcessRecord app = getProcessRecordLocked(aInfo.processName,
+                aInfo.applicationInfo.uid, true);
+        if (app == null || app.instr == null) { // 3
+            intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
+            final int resolvedUserId = UserHandle.getUserId(aInfo.applicationInfo.uid);
+            final String myReason = reason + ":" + userId + ":" + resolvedUserId;
+            //启动Luncher
+            mActivityStarter.startHomeActivityLocked(intent, aInfo, myReason); // 4
+        }
+    } else {
+        Slog.wtf(TAG, "No home screen found for " + intent, new Throwable());
+    }
+    return true;
+}
+
+Intent getHomeIntent() {
+    Intent intent = new Intent(mTopAction, mTopData != null ? Uri.parse(mTopData) : null);
+    intent.setComponent(mTopComponent);
+    intent.addFlags(Intent.FLAG_DEBUG_TRIAGED_MISSING);
+    if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
+        intent.addCategory(Intent.CATEGORY_HOME);
+    }
+    return intent;
+}
+```
+
+* `mFactoryTest`代表系统运行模式，系统运行模式有三种：**非工厂模式**、**低级工厂模式**、**高级工厂模式**。
+* `mTopAction`用来描述第一个被启动的Activity组件的action，默认值为`Intent.ACTION_MAIN`。
+* 当`mFactoryTest`为低级工厂模式并且`mTopAction==null`，直接返回false。
+* `getHomeIntent`方法中创建Intent，非低级工厂模式下，将Category设置为`Intent.CATEGORY_HOME`。
+* 注释3处判断符合Action为`Intent.ACTION_MAIN`、Category为`Intent.CATEGORY_HOME`的应用是否已经启动
+* 如果还未启动，调用注释4处的方法启动。这个被启动的应用就是**Launcher**，因为Launcher的的清单文件中匹配了Action和Category这两个值。
+
+### 4.2 Launcher中应用图标显示过程
+
+* `Launcher.java`的`onCreate`方法
+
+* 调用`LauncherAppState.java`的`setLauncher`方法，并将Launcher对象传入方法中。
+
+* 调用`LauncherModel.java`的`initialize`方法，并将传入的Launcher封装成一个弱引用对象`callbacks`。
+
+* 回到`Launcher.java`的`onCreate`方法中，调用了`LauncherModel.java`的`startLoader`方法，在该方法中：
+
+  * 创建HandlerThread对象
+  * 创建Handler，并且传入HandlerThread的Looper。Handler用于向HandlerThread发送消息。
+  * 创建LoaderTask
+  * 将LoaderTask作为消息发送给HandlerThread。
+
+* `LoaderTask`实现了Runnable接口，并且是`LauncherModel`的内部类，当LoaderTask所描述的消息被处理时，会调用它的`run`方法。
+
+* 在`LoaderTask`的`run`方法中，
+
+  * 加载工作区信息
+  * 绑定工作区信息
+  * 加载系统已经安装的应用程序信息
+
+  > **Launcher是用工作去的形式来显示系统安装的应用程序的快捷图标的，每一个工作区都是用来描述一个抽象桌面的，它是由n个屏幕组成，每个屏幕又分为n个单元格，每个单元格用来显示一个应用程序的快捷图标**。
+
+* 加载系统已经安装的应用程序是调用`LauncherModel`的`loadAllApps`方法
+
+* 然后调用回到了`Launcher`的`bindAllApplications`方法
+
+* 调用`AllAppsContainerView` 的`setApps`方法，并将包含应用信息的列表apps传进去。
+
+  > 应用信息列表apps是一个`List< Applnfo>`对象。
+
+* 然后setApps方法中又将包含应用信息的列表apps传递给了`AlphabeticalAppsList`的`setApps`方法中。
+
+* `AllAppsContainerView`中的`onFinishInflate`方法，会在`AllAppsContainerView`加载完XML布局时调用。
+
+  ```java
+  @Override
+  protected void onFinishInflate() {
+      super.onFinishInflate();
+      ...
+      mAppsRecyclerView = (AllAppsRecyclerView) findViewById(R.id.apps_list_view); // 1
+      mAppsRecyclerView.setApps(mApps); // 2
+      mAppsRecyclerView.setLayoutManager(mLayoutManager); // 3
+      mAppsRecyclerView.setAdapter(mAdapter);
+      ...
+  }
+  ```
+
+  * 注释1处得到的`AllAppsRecyclerView`用来显示App列表。
+  * 注释2处将此前`AlphabeticalAppsList`的对象`mApps`设置进去。
+  * 注释3处为`AllAppsRecyclerView`设置Adapter。
+
+* 至此，应用程序快捷图标的列表就都显示在屏幕上了。
+
