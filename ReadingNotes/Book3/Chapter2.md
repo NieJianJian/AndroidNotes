@@ -226,6 +226,37 @@ int main(int argc, char* const argv[])
 ZygoteInit的[main](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book3/source_code/ZygoteInit.md)方法中主要做了4件事儿：
 
 * 创建一个Server端的Socket。（名为"zygote"的Socket，用于等待AMS请求Zygote创建新的应用进程）
+
+  > @ZygoteServer.java的`registerServerSocket`方法。
+  >
+  > 名称拼接规则：`ANDROID_SOCKET_PREFIX` + `socketName`；
+  >
+  > 实际值为：`ANDROID_SOCKET_zygote`。
+
 * 预加载类和资源。
+
 * 启动SystemServer进程。
+
+  > @ZygoteInit.java的`startSystemServer`方法
+
 * 等待AMS请求创建新的应用方程序进程。
+
+  > @ZygoteServer.java的[`runSelectLoop`](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book3/source_code/Method_runSelectLoop.md)方法
+
+### 2.3 Zygote进程启动总结
+
+* (1) 创建`AppRuntime`并调用其`start`方法，启动Zygote进程。
+* (2) 创建Java虚拟机并为Java虚拟机注册JNI方法
+* (3) 通过JNI调用`ZygoteInit`的`main`函数进入Zygote的Java框架层
+* (4) 通过`registerZygoteSocket`方法创建服务器端的Socket，并通过`runSelectLoop`方法等待AMS的请求创建新的应用进程。
+* (5) 启动`SystemServer`进程。
+
+***
+
+### 3 SystemServer处理过程
+
+　　SystemServer进程主要用于创建系统服务，如AMS、WMS、PMS。
+
+### 3.1 Zygote处理SystemServer进程
+
+![Zygote处理SystemServer进程的时序图](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/zygotedealSystemServer.png)
