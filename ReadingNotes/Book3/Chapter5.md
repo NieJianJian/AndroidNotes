@@ -24,6 +24,8 @@ Context的关联类才用了装饰模式，主要有以下的**优点**：
 * ContextImpl的实现不会暴露给使用者，使用者也不必关心ContextImpl的实现。
 * 通过组合而非集成的方式，拓展ContextImpl的功能，在运行时选择不同的装饰类，实现不同的功能。
 
+***
+
 ### 2 Application Context的创建过程
 
 ![Application Context的创建过程的时序图](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/context_applicationcreate.png)]
@@ -103,6 +105,8 @@ Context的关联类才用了装饰模式，主要有以下的**优点**：
 
   **Application的`attach`方法的作用就是使Application可以使用Context的方法**。
 
+***
+
 ### 3 Application Context的获取过程
 
 * 调用`ContextWrapper`的`getApplicationContext`方法
@@ -120,6 +124,8 @@ Context的关联类才用了装饰模式，主要有以下的**优点**：
   ```
 
   在之前的`LoadedApk`的`makeApplication`中，`mApplication`已经被赋值，这样我们就可以获取到Application Context了。
+
+***
 
 ### 4 Activity的Context的创建过程
 
@@ -214,6 +220,8 @@ Context的关联类才用了装饰模式，主要有以下的**优点**：
   我们调用`ContextWrapper`的`getTheme`方法时，其实是调用的`ContextImpl`的方法。
 
 **总结**：在启动Activity的过程中创建`ContextImpl`，并赋值给`ContextWrapper`的成员变量`mBase`。Activity继承自`ContextWrapper`的子类`ContextThemeWrapper`，这样Activity中就可以使用Context中定义的方法了。
+
+***
 
 ### 5 Service的Context创建过程
 
