@@ -7,5 +7,9 @@
 * [第6章 理解ActivityManagerService](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book3/Chapter6.md)
 * [第7章 理解WindowManager](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book3/Chapter7.md)
 * [第8章 理解WindowManagerService](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book3/Chapter8.md)
+* [第9章 JNI原理](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book3/Chapter9.md)
 * [第12章 理解ClassLoader](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book3/Chapter12.md)
+* [第13章 热修复原理](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book3/Chapter13.md)
+* [第14章 Hook技术](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book3/Chapter14.md)
+* [第15章 插件化原理](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book3/Chapter15.md)
 
