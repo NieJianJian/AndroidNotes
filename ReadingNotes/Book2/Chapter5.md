@@ -51,8 +51,8 @@ JNIEXPORT jnint JNICALL JNI_OnLoad(javaVM *vm, void *reserved) {
 }
 ```
 
-* 静态注册的native方法必须是**`"Java_"`+类完整路径+方法名**的格式。
-* 动态注册的antive方法必须实现`JNI_OnLoad`方法，同时实现一个`JNINativeMethod[]`数组。
+* 静态注册的native方法必须**是`"Java_"`+类完整路径+方法名**的格式。
+* 动态注册的native方法必须实现`JNI_OnLoad`方法，同时实现一个`JNINativeMethod[]`数组。
 
 <img src="https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/so_native_method_yingshe.png" alt="native方法映射逻辑 " style="zoom:50%;" />
 
@@ -107,9 +107,9 @@ JNIEXPORT jnint JNICALL JNI_OnLoad(javaVM *vm, void *reserved) {
 so库的实时生效必须满足以下几点：
 
 * so库为了兼容Dalvik虚拟机下动态注册native方法实时生效，必须对so文件进行改名。
-* 针对so库静态注册native方法的实时生效，首先需要**解注册**静态注册的naive方法，这个也是难点，因为哦们很难知道so库中哪几个静态注册的native方法发生了变更。假设就算我们知道，也不能保证一定会被修复。
-* 上面对补丁so进行了二次加载，那么肯定是多消耗依次本地内存，如果补丁so库勾搭，补丁so库够多，那么JNI层的OOM也不是没有可能。
-* 另外一方面补丁so库如果新增了一个动态注册的方法而dex中没有相应方法，直接去加载这个补丁so文件会报`NoSuchMethodError`异常，具体逻辑在`dvmRegisterJNIMethod`中。我们知道如果dex新增一个native方法，那么就不能热部署只能冷启动剩下，所以此时补丁so库就不能第二次加载了。这种情况下so库的修复严重依赖于dex的修复方案。
+* 针对so库静态注册native方法的实时生效，首先需要**解注册**静态注册的naive方法，这个也是难点，因为我们很难知道so库中哪几个静态注册的native方法发生了变更。假设就算我们知道，也不能保证一定会被修复。
+* 上面对补丁so进行了二次加载，那么肯定是多消耗一次本地内存，如果补丁so库够大，补丁so库够多，那么JNI层的OOM也不是没有可能。
+* 另外一方面补丁so库如果新增了一个动态注册的方法而dex中没有相应方法，直接去加载这个补丁so文件会报`NoSuchMethodError`异常，具体逻辑在`dvmRegisterJNIMethod`中。我们知道如果dex新增一个native方法，那么就不能热部署只能冷启动生效，所以此时补丁so库就不能第二次加载了。这种情况下so库的修复严重依赖于dex的修复方案。
 
 ***
 
@@ -126,7 +126,7 @@ SOPatchManager.loadLibrary(String libName) -> 代替 System.loadLibrary(String l
 `SOPatchManager.loadLibrary`接口加载so库的时候优先尝试去加载**SDK指令目录下的补丁so**，策略如下：
 
 * 如果存在则加载补丁so库而不去加载APK安装目录下的so库。
-* 如果不存在补丁so，那么掉哦那个`System.loadLibrary`去加载APK安装目录下的so库。
+* 如果不存在补丁so，那么调用`System.loadLibrary`去加载APK安装目录下的so库。
 
 这个方案的优缺点：
 

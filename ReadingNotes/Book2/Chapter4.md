@@ -30,7 +30,7 @@ Instant Run中的资源热修复分为两步：
     private native final int addAssetPathNative(String path);
 ```
 
-执行addAssetPath就是解析这个格式，然后高早出底层数据结构的过程。整个解析资源调用链是：
+执行addAssetPath就是解析这个格式，然后构造出底层数据结构的过程。整个解析资源调用链是：
 
 * public final int addAsset(String path)
 * android_content_AssetManager_addAssetPath
@@ -130,7 +130,7 @@ struct ResChunk_header
 
 ### 3 运行时资源的解析
 
-默认由Android SDK编出来的APK，是由AAPT工具进行打包的，起资源包的package id就是**0x7f**。
+默认由Android SDK编出来的APK，是由AAPT工具进行打包的，其资源包的package id就是**0x7f**。
 
 系统资源包，也就是frameworks-res.jar，package id为**0x01**。
 

@@ -6,7 +6,7 @@
 
 |      | QQ空间                                                       | Tinker                                                       |
 | :--: | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| 原理 | 为了解决Dalvik下unexpected dex problem异常而采用插桩的方式，单独放一个帮助类在独立的dex中让其他类调用，阻止了类被打上CLASS_ISPREVERIFIED标志从而规避问题的出现。最后加载补丁dex得到dexFile对象作为参数构建一个Element对象插入到dexElements数组的最前面 | 提供dex差量包，整体替换dex的方案。差量的方式给出patch.dex，然后将patch.dex与应用的classes.dex合并成一个完整的dex，完整dex加载得到的dexFile对象作为参数构建一个Element对象然后然后整体替换掉旧的dexElements数组 |
+| 原理 | 为了解决Dalvik下unexpected dex problem异常而采用插桩的方式，单独放一个帮助类在独立的dex中让其他类调用，阻止了类被打上CLASS_ISPREVERIFIED标志从而规避问题的出现。最后加载补丁dex得到dexFile对象作为参数构建一个Element对象插入到dexElements数组的最前面 | 提供dex差量包，整体替换dex的方案。差量的方式给出patch.dex，然后将patch.dex与应用的classes.dex合并成一个完整的dex，完整dex加载得到的dexFile对象作为参数构建一个Element对象然后整体替换掉旧的dexElements数组 |
 | 优点 | 没有合成整包，产物比较小，比较灵活                           | 自研dex差异算法，补丁包很小，dex merge成完整dex，Dalvik不影响类加载性能，Art下也不存在必须包含父类/引用类的情况 |
 | 缺点 | Dalvik下影响类加载性能，Art下类地址写死，导致必须包含父类/引用类，最后补丁包很大 | dex合并内存消耗在vm heap上，容易OOM，最后导致dex合并失败     |
 
@@ -56,7 +56,7 @@
 
 　　**问题**：如果优化后的odex文件没有生成或者不完整，那么loadDex便不能在应用启动的时候进行，因为会阻塞loadDex线程，一般是主线程。
 
-　　**方案**：把`loadDex`当做一个事务来看，如果中途打断，那么就删除odex，重启的时候如果发现存在odex文件，loadDex完知乎，反射注入/替换dexElements数组，实现打包。如果不存在odex文件，那么重启另一个子线程loadDex，重启之后再生效。
+　　**方案**：把`loadDex`当做一个事务来看，如果中途打断，那么就删除odex，重启的时候如果发现存在odex文件，loadDex完之后，反射注入/替换dexElements数组，实现打包。如果不存在odex文件，那么重启另一个子线程loadDex，重启之后再生效。
 
 ### 1.7 完整的方案考虑
 
@@ -133,15 +133,15 @@ class A {
 * 传统方案：完整的dex就是把原有的dex和补丁包里的dex重新合并成一个。
 * Sophix方案：原有基线包的dex中，去掉补丁中也有的类，补丁 + 去除补丁类的基线包，就是新App中的所有类了。
 
-　　和Android原生的multi-dex同理，基线包在去掉了补丁中的类后，原有需要发生变更的类就消除了，基线包dex里就只包含不变的类了。而这些不变的类在要用到补丁中的新类时会自动去找补丁dex，补丁包中的新类在需要用到不变的类是也会找到基线包dex的类，这样基线包里面不使用补丁类的类仍旧可以按照原有的逻辑odex，最大成都保证了dexopt的效果。优点如下：
+　　和Android原生的multi-dex同理，基线包在去掉了补丁中的类后，原有需要发生变更的类就消除了，基线包dex里就只包含不变的类了。而这些不变的类在要用到补丁中的新类时会自动去找补丁dex，补丁包中的新类在需要用到不变的类是也会找到基线包dex的类，这样基线包里面不使用补丁类的类仍旧可以按照原有的逻辑odex，最大程度保证了dexopt的效果。优点如下：
 
 * 不需要像传统合成思路那样判断类的增加和修改情况
 * 也不需要处理合成时方法数超了的情况
 * 对于dex的结构也不用进行破坏性重构。
 
-　　现在，合成完整dex的问题就简化为如何在基线包里面去掉补丁包中包含的所有类。[dex文件中的header结构和各个属性](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book2/source_code/DexHeader.md)。既然要去除dex中得类，最关心的应该是`class_defs`属性。
+　　现在，合成完整dex的问题就简化为如何在基线包里面去掉补丁包中包含的所有类。[dex文件中的header结构和各个属性](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book2/source_code/DexHeader.md)。既然要去除dex中的类，最关心的应该是`class_defs`属性。
 
-　　我们并不需要把某个类得所有信息都从dex移出，仅仅是使得在解析这个dex得时候找不到这个类的定义就可以了。因此，**只要移除定义的入口，对于类的具体内容不进行删除，这样就可以最大限度的减少`offset`的修改**。
+　　我们并不需要把某个类的所有信息都从dex移出，仅仅是使得在解析这个dex的时候找不到这个类的定义就可以了。因此，**只要移除定义的入口，对于类的具体内容不进行删除，这样就可以最大限度的减少`offset`的修改**。
 
 * [如何去除dex中的类定义](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book2/source_code/DexClassDef.md)
 
@@ -174,7 +174,7 @@ classObj->acccessFlags &= ~CLASS_ISPREVERIFIED
 
 　　Dalvik虚拟机如果发现某个类没有pre-verified，就会在初始化这个类时做Verify操作，将会扫描这个类的所有代码，在扫描过程中**对这个类代码里使用到的类**都进行`dvmOptResolveClass`操作。它会在解析的时候对使用到的类进行初始化，而这个逻辑是发生在Application类初始化的时候。此时补丁还没进行加载，所以就会提前加载原始dex中的类。接下来当补丁加载完毕后，当这些已经加载的类用到新dex中的类，并且又是pre-verified时就会报错。
 
-　　这里最大的问题是*无法把不定加载提前到dvmOptResolveClass之前，因为在一个App的生命周期里，没有可能到达比入口Application初始化更早的时期了*。问题常见于多dex，因为无法保证Application用到的类和它处于同个dex中。多dex情况下想要解决这个问题，有两种办法：
+　　这里最大的问题是*无法把补丁加载提前到dvmOptResolveClass之前，因为在一个App的生命周期里，没有可能到达比入口Application初始化更早的时期了*。问题常见于多dex，因为无法保证Application用到的类和它处于同个dex中。多dex情况下想要解决这个问题，有两种办法：
 
 * 让Application用到的所有非系统类都和Application位于同一个dex里，这样就可以保证pre-verified标志被打打上，避免进入dvmOptResolveClass，而在补丁加载完之后，我们再清除pre-verified标志，使得接下来使用其他类也不会报错。
 * 把Application里面除了热修复框架代码以外的其他代码都剥离开，单独提出放到一个其他类里面，这样使得Application不会直接用到过多非系统类，这样，保证这个单独拿出来的类和Application处于同一个dex的该类还是比较大的。如果想要更保险，Application可以采用反射方式访问这个单独类，这样就彻底把Application和其他类隔绝开了。
@@ -251,19 +251,19 @@ public class SampleApplication extends Application {
 
 上面代码容易出现的几个问题：
 
-* 1.  CrashReport.initCrashReport(this)在Sophix热修复初始化之前提早引入，必然是不行的。
-* 2. 虽然初始化确实是在attachBaseContext里，但是包装了一个SophixWrApper类，这回导致初始化之前提前引入类。因此初始化不可以包装在其他类中。
-* 3. 在setAppVersion的时候使用了BuildConfig类，这个BuildConfig类是Android编译期间动态生成的，也属于非系统类，如果这里使用就会提前加载。建议用PackageManager来获取版本号。
-* 4. 在回调类中使用了MyLogger，在回调状态的时候引用很可能热修复还未初始化完毕，因此需要换为系统类android.utils.log。
-* 5. LocalStorageUtil直接在声明处赋值了它的实例，这个赋值起始是隐式发生在对象构造函数中的，这个时候甚至早于attachBaseContext的，因此需要咋初始化之后才能赋值。
-* 6. MultiDex.install(this)调用放在了热修复初始化后，这样做虽然没有引入类的问题，但是可能导致后面热修复框架初始化的时候找不到其他不在主dex中的热修复框架内部类，因此需要把它提前到热修复初始化之前。而提早引入MultiDex类不会带来问题，因为在热修复初始化之后，再也没有调用这个MultiDex类的地方。
-* 7. super.attachBaseContext(base)必须加上，否则无法正常运行。
+* CrashReport.initCrashReport(this)在Sophix热修复初始化之前提早引入，必然是不行的。
+* 虽然初始化确实是在attachBaseContext里，但是包装了一个SophixWrApper类，这会导致初始化之前提前引入类。因此初始化不可以包装在其他类中。
+* 在setAppVersion的时候使用了BuildConfig类，这个BuildConfig类是Android编译期间动态生成的，也属于非系统类，如果这里使用就会提前加载。建议用PackageManager来获取版本号。
+* 在回调类中使用了MyLogger，在回调状态的时候引用很可能热修复还未初始化完毕，因此需要换为系统类android.utils.log。
+* LocalStorageUtil直接在声明处赋值了它的实例，这个赋值起始是隐式发生在对象构造函数中的，这个时候甚至早于attachBaseContext的，因此需要在初始化之后才能赋值。
+* MultiDex.install(this)调用放在了热修复初始化后，这样做虽然没有引入类的问题，但是可能导致后面热修复框架初始化的时候找不到其他不在主dex中的热修复框架内部类，因此需要把它提前到热修复初始化之前。而提早引入MultiDex类不会带来问题，因为在热修复初始化之后，再也没有调用这个MultiDex类的地方。
+* super.attachBaseContext(base)必须加上，否则无法正常运行。
 
 ### 4.3 入口类带来的修复限制
 
 　　如果修改了入口Application中直接使用的类的结果，可能会引起错位异常。如果某个类的某个方法，是根据方法索引来取得的，这时候类里面新增或减少方法，可能会导致索引错位。
 
-　　保证初始化在单独的入口类中进行，后面在用反射的方式替换为原有的Application。上面的代码案例中，可以把Sophix初始化相关逻辑移除，把初始化方法到了一个单独的SophixStubApplication类黄总，这个类作为AndroidManifest的入口替换掉原来的SampleApplicaiton类。
+　　保证初始化在单独的入口类中进行，后面在用反射的方式替换为原有的Application。上面的代码案例中，可以把Sophix初始化相关逻辑移除，把初始化方法到了一个单独的SophixStubApplication类种，这个类作为AndroidManifest的入口替换掉原来的SampleApplicaiton类。
 
 ```java
 public class SophixStubApplication extends SophixApplication {
