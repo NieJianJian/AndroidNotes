@@ -11,3 +11,4 @@
 
 [Sophix方案比较](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book2/Sophix.md)
 
+[Words](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book2/Words.md)

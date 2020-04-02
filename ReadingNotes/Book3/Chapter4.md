@@ -93,7 +93,7 @@
 
 * 随后调用`ActivityStarter`的`startActivityLocked`方法，该方法的：
 
-  * 倒数第二个参数类型为**`TaskRecord`，代表启动的Activity所在的栈**。
+  * 倒数第二个参数类型为`TaskRecord`，代表启动的Activity所在的栈。
   * 倒数第一个参数`"startActivityAsUser"`代表启动的理由。
 
   > ActivityStarter是Android 7.0新加入的类，它是加载Activity的控制类，会收集所有的逻辑来决定如何将Intent和Flags转换为Activity，并将Activity和Task以及Stack相关联。
@@ -115,7 +115,7 @@
 
   * 此方法执行过程中，有一个判断条件，就是之前对Intent的Flag设置的`FLAG_ACTIVITY_NEW_TASK`，此时条件是满足的，继续执行代码。
 
-  * 创建一个新的**`TaskRecord`，用来描述一个Activity任务栈**。
+  * 创建一个新的`TaskRecord`，用来描述一个Activity任务栈。
 
     > Acitivty任务栈是一个假想的模型，并不真实存在。
 

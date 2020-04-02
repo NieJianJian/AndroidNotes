@@ -2,7 +2,7 @@
 
 ### 1.Java虚拟机运行时数据区
 
-![](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/jvmruntimedata.jpg)
+![图：Java虚拟机运行时数据区](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/jvmruntimedata.jpg)
 
 ### 1.1 程序计数器
 
@@ -141,13 +141,13 @@
 
 * 句柄：Java堆中将会划分处一块内存做为句柄池，reference中存储的就是对象的句柄地址，句柄中包含了包含了对象实例数据与类型数据各自的具体地址信息。
 
-  ![](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/handleaccessproject.png)
+  ![图：通过句柄访问对象](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/handleaccessproject.png)
 
   * **好处**：reference中存储的是稳定的句柄地址，对象被移动时（垃圾收集时移动对象是非常普遍的行为）只会改变句柄中的实例数据指针，reference本身不需要修改。
 
 * 直接指针：Java堆对象的布局中就必须考虑如何放置访问类型数据的相关信息，而reference中存储的直接就是对象地址。
 
-  ![](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/directpointeraccessoobject.png)
+  ![图：通过直接指针访问对象](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/directpointeraccessoobject.png)
 
   * **好处**：速度快，节省一次指针定位的时间开销。
 

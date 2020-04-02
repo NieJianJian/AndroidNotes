@@ -302,7 +302,7 @@ ZygoteInit的[main](https://github.com/NieJianJian/AndroidNotes/blob/master/Read
     * 注释2处找到`SystemServer`中的`main`方法。
     * 注释3处将找到的main方法传入`MethodAndArgsCaller`异常并抛出该异常。
       * 捕获该异常的代码在`ZygoteInit.java`的`main`方法中，这个`main`方法会调用SystemServer的main方法。
-      * **为什么不直接调用而选择抛出异常？**因为这种抛出异常的处理会清除所有的设置过程需要的堆栈帧，并让SystemServer的mian方法看起来像是SystemServer进程的入口方法。
+      * **为什么不直接调用而选择抛出异常**？因为这种抛出异常的处理会清除所有的设置过程需要的堆栈帧，并让SystemServer的mian方法看起来像是SystemServer进程的入口方法。
 
 ### 3.2 解析SystemServer进程
 
@@ -407,7 +407,7 @@ Intent getHomeIntent() {
   * 绑定工作区信息
   * 加载系统已经安装的应用程序信息
 
-  > **Launcher是用工作去的形式来显示系统安装的应用程序的快捷图标的，每一个工作区都是用来描述一个抽象桌面的，它是由n个屏幕组成，每个屏幕又分为n个单元格，每个单元格用来显示一个应用程序的快捷图标**。
+  > **Launcher是用工作区的形式来显示系统安装的应用程序的快捷图标的，每一个工作区都是用来描述一个抽象桌面的，它是由n个屏幕组成，每个屏幕又分为n个单元格，每个单元格用来显示一个应用程序的快捷图标**。
 
 * 加载系统已经安装的应用程序是调用`LauncherModel`的`loadAllApps`方法
 
