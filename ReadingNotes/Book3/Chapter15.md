@@ -223,7 +223,7 @@ Hook技术实现主要有两种解决方案
 
 * **3 还原插件Activity**
 
-  适用StubAcitivyt通过了AMS验证，但是还需要用插件TargetActivity来替换占坑的StubActivity。
+  适用StubActivity通过了AMS验证，但是还需要用插件TargetActivity来替换占坑的StubActivity。
 
   在[ActivityThread启动Activity的过程]([https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book3/Chapter4.md#13-activitythread%E5%90%AF%E5%8A%A8activity%E7%9A%84%E8%BF%87%E7%A8%8B](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book3/Chapter4.md#13-activitythread启动activity的过程))中，ActivityThread会通过H类将代码的逻辑切换到主线程，并发送`LAUNCH_ACTIVITY`消息进行处理，最终会调用Activity的onCreate方法。
 

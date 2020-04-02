@@ -80,7 +80,7 @@ Native方法注册分为**静态注册**和**动态注册**。静态注册多用
   * `JNIEnv`是Native世界中Java环境代表，通过`JNIEnv * `指针就可以在Native世界中访问Java世界的代码进行操作。**只在创建它的线程中有效，不能跨进程传递**。
   * `jclass`是JNI的数据类型，对应Java的`java.lang.Class`实例。
 
-  Java中调用`native_init`方法时，会找到`JAVA_com_example_MediaRecorder_native_1init`并建立关联，其实是保存JNI的函数指针，这样再次调用`native_init`犯法时直接使用这个函数指针就可以了。
+  Java中调用`native_init`方法时，会找到`JAVA_com_example_MediaRecorder_native_1init`并建立关联，其实是保存JNI的函数指针，这样再次调用`native_init`方法时直接使用这个函数指针就可以了。
 
   静态注册是根据方法名，将Java方法和JNI函数建立关联。缺点如下：
 

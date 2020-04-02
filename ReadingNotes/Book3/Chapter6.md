@@ -339,12 +339,12 @@ AMS与应用程序进程的关系主要有以下两点：
 
 * ActivityRecord用来记录一个Activity的所有信息。
 * TaskRecord中包含一个或多个ActivityReord。
-* TaskRecord用来表示Activity的任务站，用来管理栈中的ActivityRecord。
+* TaskRecord用来表示Activity的任务栈，用来管理栈中的ActivityRecord。
 * ActivityStack又包含了一个或多个TaskRecord，它是TaskRecord的管理者。
 
 **优点**：有了栈管理，应用可以复用自身应用中以及其他应用中的Activity，节省了资源。
 
-**eg**：一款社交应用黄总，这个应用的联系人详情页面提供了联系人的邮箱，我们点击邮箱时会跳到发送邮件的界面。社交应用和系统Email中的Activity处于不同应用程序进程的，而有了栈管理，就可以把发送邮件界面放到社交应用中详情页面所在栈的栈顶，来做跨进城操作。
+**eg**：一款社交应用中，这个应用的联系人详情页面提供了联系人的邮箱，我们点击邮箱时会跳到发送邮件的界面。社交应用和系统Email中的Activity处于不同应用程序进程的，而有了栈管理，就可以把发送邮件界面放到社交应用中详情页面所在栈的栈顶，来做跨进程操作。
 
 ### 5.2 Launch Mode
 

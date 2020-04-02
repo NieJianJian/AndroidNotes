@@ -47,13 +47,13 @@ Hook技术可以在进程间进行行为更改。Hook可以将自己融入到它
 
 ### 3 代理模式
 
-[代理模式]([https://github.com/NieJianJian/AndroidNotes/blob/master/Java/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F.md](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/代理模式.md))
+[代理模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/代理模式.md)
 
 ***
 
 ### 4 Hook startActivity方法
 
-Hook可以用来劫持对象，被劫持的对象叫做Hook点，用代理对象来代替Hook点，这样就可以在代理上实现自己想做的操作。这里以Hook常用的`startActivity`方法来距离，`startActivity`方法分为以下两个：
+Hook可以用来劫持对象，被劫持的对象叫做Hook点，用代理对象来代替Hook点，这样就可以在代理上实现自己想做的操作。这里以Hook常用的`startActivity`方法来举例，`startActivity`方法分为以下两个：
 
 ```java
 startActivity(intent);

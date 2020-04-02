@@ -157,6 +157,13 @@
   Class type = field.getType();
   ```
 
+  ```java
+  // 通过字段获取对象
+  public Object get(Object obj)
+  // 字段不是静态字段，要传入反射类的对象，如果传入null就会报NullPointerException
+  // 如果是静态字段的话，传入任何对象都是可以的，包括null。
+  ```
+
   2.获取class对象的方法
 
   ```java
