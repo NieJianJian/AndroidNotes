@@ -14,6 +14,7 @@
 * [代理模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/代理模式.md)
 * [Java注解](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/java注解.md)
 * [HashMap原理解析](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/HashMap原理解析.md)
+* [Java并发三大特性](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaConcurrent.md)
 
 ## Android进阶
 
