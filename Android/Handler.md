@@ -199,8 +199,6 @@ public final boolean sendMessage(Message msg) {
 
 ​		不管时post一个Runnable还是Message，都会调用sendMessage(msg, time)方法。Handler最终将消息追加到MessageQueue中，而Looper不断地从MessageQueue中读取消息，并且调用Handler的dispatchMessage方法，这样消息就能源源不断地被产生、添加到MessageQueue、被Handler处理。
 
-
-
 #### 2.在子线程中创建Handler为何会抛出异常
 
 ​		首先看代码：
@@ -243,7 +241,17 @@ new Thread() {
 }.start();
 ```
 
+***
 
+***
+
+***
+
+**问题1：为什么主线程的Looper.loop()死循环不会导致ANR**？
+
+　　主线程的死循环一直运行是不是特别消耗CPU资源呢？ 其实不然，这里就涉及到Linux `pipe/epoll`机制，简单说就是在主线程的MessageQueue没有消息时，便阻塞在loop的queue.next()中的nativePollOnce()方法里，详情见[Android消息机制1-Handler(Java层)](https://link.zhihu.com/?target=http%3A//www.yuanhh.com/2015/12/26/handler-message-framework/%23next)，此时主线程会释放CPU资源进入休眠状态，直到下个消息到达或者有事务发生，通过往pipe管道写端写入数据来唤醒主线程工作。这里采用的`epoll`机制，是一种IO多路复用机制，可以同时监控多个描述符，当某个描述符就绪(读或写就绪)，则立刻通知相应程序进行读或写操作，本质同步I/O，即读写是阻塞的。 所以说，主线程大多数时候都是处于休眠状态，并不会消耗大量CPU资源。
+
+参考链接：[Android中为什么主线程不会因为Looper.loop()里的死循环卡死？](https://www.zhihu.com/question/34652589)
 
 
 
