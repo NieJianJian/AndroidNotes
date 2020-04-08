@@ -9,12 +9,16 @@
 
 ## Java基础
 
+* [Java集合类]()
+  * [HashMap原理解析](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/HashMap原理解析.md)
+* [JVM（JAVA虚拟机）]()
+  * [JMM（Java内存模型）](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JMM.md)
+* [Java多线程]()
+  * [Java并发三大特性](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaConcurrent.md)
 * [Java优化性能的45个细节](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/Java%E4%BC%98%E5%8C%96%E6%80%A7%E8%83%BD%E7%9A%8445%E4%B8%AA%E7%BB%86%E8%8A%82.md)
 * [Java反射](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/Java反射.md)
 * [代理模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/代理模式.md)
 * [Java注解](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/java注解.md)
-* [HashMap原理解析](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/HashMap原理解析.md)
-* [Java并发三大特性](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaConcurrent.md)
 
 ## Android进阶
 
