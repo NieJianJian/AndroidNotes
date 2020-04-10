@@ -21,7 +21,7 @@
   * [线程池处理流程和原理](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#2-线程池处理流程和原理)
   * [线程池的种类](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#3-线程池的种类)
   * [线程池的使用准则](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#4-线程池的使用准则)
-* [附录：相关示例代码](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#附相关示例代码)
+* [附录：相关示例代码](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#附录相关示例代码)
 
 ***
 
