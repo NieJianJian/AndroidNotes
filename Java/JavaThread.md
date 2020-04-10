@@ -9,16 +9,18 @@
   * [4. 线程的终止]()
 * [二. 多线程]()
   * [1. 线程间的协作]() 
-  * [2. 多线程相关方法——Callable、Future和FutureTask]()
+  * [2. 线程间的调度]()
+  * [3. 多线程相关方法——Callable、Future和FutureTask]()
 * [三. 同步]()
   * [同步锁]() 
   * [同步集合]()
   * [阻塞队列]()
+  * [Java并发三大特性](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaConcurrent.md)
 * [四. 线程池]()
-  * []()
-  * []()
-  * []()
-  * []()
+  * [ThreadPoolExecutor]()
+  * [线程池处理流程和原理]()
+  * [线程池的种类]()
+  * [线程池的使用准则]()
 
 ***
 
@@ -254,13 +256,44 @@
 
   先说两个概念，Java中每个对象都有两个池，**锁池**和**等待池**
 
-  > **锁池**：假设线程A已经拥有了某个对象(注意:不是类)的锁，而其它的线程想要调用这个对象的某个synchronized方法(或者synchronized块)，由于这些线程在进入对象的synchronized方法之前必须先获得该对象的锁的拥有权，但是该对象的锁目前正被线程A拥有，所以这些线程就进入了该对象的锁池中。
-  >
-  > **等待池**：假设一个线程A调用了某个对象的wait()方法，线程A就会释放该对象的锁后，进入到了该对象的等待池中。
+  * **锁池**：假设线程A已经拥有了某个对象(注意:不是类)的锁，而其它的线程想要调用这个对象的某个synchronized方法(或者synchronized块)，由于这些线程在进入对象的synchronized方法之前必须先获得该对象的锁的拥有权，但是该对象的锁目前正被线程A拥有，所以这些线程就进入了该对象的锁池中。
+    * 锁池中的对象相互竞争，优先级高的得到锁的概率高。
+  * **等待池**：假设一个线程A调用了某个对象的wait()方法，线程A就会释放该对象的锁后（wait()必须在同步块中，所以调用前就已经拥有了该对象的锁），进入到了该对象的等待池中。
+    * 其他线程调用了相同对象的notifyAll()，处于等待池的线程都会进入到锁池中去争夺锁。如果调用notify()，那仅会有一个线程（随机）进入到锁池。
+  * [参考连接](https://www.zhihu.com/question/37601861)
 
-
-
-
+  ```java
+  private static Object sLockObject = new Object();
+  public static void main(String[] args) {
+      System.out.println("主线程运行");
+      Thread thread = new WaitThread();
+      thread.start();
+      long time = System.currentTimeMillis();
+      try {
+          synchronized (sLockObject) {
+              System.out.println("主线程等待");
+              sLockObject.wait();
+          }
+      } catch (Exception e) {
+      }
+      System.out.println("主线程继续，等待耗时 ： " + (System.currentTimeMillis() - time));
+  }
+  static class WaitThread extends Thread {     
+      public void run() {
+          try {
+              synchronized (sLockObject) {
+                  Thread.sleep(3000);
+                  sLockObject.notifyAll();
+              }
+          } catch (Exception e) {
+          }
+      }
+  }
+  
+  主线程运行
+  主线程等待
+  主线程继续，等待耗时 ： 3003
+  ```
 
 * join
 
@@ -336,7 +369,27 @@
 
 ***
 
-#### 2. 多线程相关方法——Callable、Future和FutureTask
+#### 2. 线程间的调度
+
+线程调度是指系统为线程分配处理器使用权的过程，主要分为以下两种：
+
+* **协同式线程调度**
+
+  线程的执行时间由线程本身来控制，线程把自己的工作执行完了，主动通知系统切换到另一个线程上。
+
+  * 好处是实现简单，由于线程把自己的事情做完才会进行线程切换，切换线程对线程自己是可知的，所以没有线程的同步问题。Lua语言的"协同例程"就是这类实现。
+  * 坏处是线程执行时间不可控，可能会导致阻塞。
+
+* **抢占式线程调度**
+
+  每个线程将由系统来分配执行时间片。
+
+  * 好处是线程的执行时间是系统可控的，不会有一个线程导致整个进程阻塞的问题。**Java使用的就是抢占式线程调度**。
+  * 线程的优先级高的虽然容易被系统执行，但是优先级并不是很靠谱。因为Java的线程是通过映射到系统的原生线程上来实现的，所以线程调度最终还是取决于操作系统。操作系统提供的优先级和Java线程的优先级并不能一一对应。当Java线程的优先级比操作系统少时，可能两个不同的优先级在操作系统层面变得相同了。
+
+***
+
+#### 3. 多线程相关方法——Callable、Future和FutureTask
 
 Callable、Future、futureTask只能运用在线程池，而Runnable即能运用在Thread中，也能运用在线程池中。
 
@@ -512,15 +565,19 @@ Callable、Future、futureTask只能运用在线程池，而Runnable即能运用
 
 * **synchronized和ReentrantLock的比较**
 
-  * 使用同步，JVM将确保锁会自动释放。Lock类需要手动释放
-  * 使用同步，JVM在生成线程转储时能够包括锁定信息，这些对调试非常有用，因为它们能标识死锁或者其他异常行为的来源。JVM不知道具体哪个线程拥有Lock对象。
+  * synchronized和RenntrantLock都是可重入锁。
 
-  |        | synchronized | ReentrantLock |
-  | ------ | ------------ | ------------- |
-  | 锁释放 | 自动释放     | 手动释放      |
-  |        |              |               |
-  |        |              |               |
-  |        |              |               |
+    > 可重入锁：也叫做递归锁，指的是在同一线程内，外层函数获得锁之后，内层递归函数仍然可以获取到该锁。可重入锁可以防止在同一个线程中多次获取锁而导致死锁。
+
+  |            | synchronized                                                 | ReentrantLock                                                |
+  | ---------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+  | 类型       | 隐私锁                                                       | 显示锁                                                       |
+  | 实现       | 系统自动释放                                                 | 必须手动释放锁，加锁和释放锁次数要一致                       |
+  | 灵活性     | 锁的范围是整个方法或者代码块                                 | Lock是方法调用，可以跨方法，更灵活                           |
+  | 等待可中断 | 等待的线程不可中断，除非完成或者抛出异常                     | 可以调用tryLock方法超时放弃等待                              |
+  | 是否公平锁 | 非公平锁                                                     | 默认公平锁，构造器可传入boolean的只控制是否公平锁。          |
+  | 适用情况   | 资源竞争不激烈的情况下使用。因为编译程序会尽可能的进行优化，而且可读性好。 | ReentrantLock提供了多样化的同步，比如有时间限制的同步，可以被Interrupt的同步（synchronized的同步是不能Interrupt的）等。资源竞争激烈的情况下，synchronized的性能一下子降低好几十倍，ReentrantLock还能保持常态。 |
+  | 其他       | JVM在生成线程转储时能够包括锁定信息，这些对调试非常有用，因为它们能标识死锁或者其他异常行为的来源。 | JVM不知道具体哪个线程拥有Lock对象。                          |
 
 * **信号量Semaphore**
 
@@ -722,31 +779,122 @@ public ThreadPoolExecutor(int corePoolSize,
   * DiscardPolicy：添加不进去的任务都抛弃，没有异常抛出。
   * DiscardOldestPolicy：丢弃队列头部任务，并执行当前任务。
 
+***
+
 #### 2. 线程池处理流程和原理
 
-```flow
-op=>operation: 提交任务
-op1=>operation: 创建核心线程执行任务
-op2=>operation: 将任务加在任务队列中
-op3=>operation: 创建非核心线程执行任务
-op4=>operation: 饱和策略
+![图：线程池的处理流程](https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/threadpoolprocessflow.png)
 
-cond=>condition: 线程数是否达到
-								corePoolSize
-cond1=>condition: 任务队列是否已满
-cond2=>condition: 线程数是否达到
-									最大线程数
+上图可以看出，线程的处理流程主要分为3个步骤：
 
-op->cond
-cond(yes)->cond1
-cond(no)->op1
-cond1(yes)->cond2
-cond1(no)->op2
-cond2(yes)->op4
-cond2(no)->op3
-```
+* 提交任务后，线程池先判断线程数是否达到了核心线程数。如果未达到，则创建核心线程处理任务；否则，就执行下一步操作。
+* 接着线程池判断任务队列中是否已经满了。如果没满，则将任务添加到任务队列中；否则，执行下一步。
+* 接着因为任务队列中满了，线程池判断是否达到了最大线程数。如果未达到，则创建非核心线程处理任务；否则，执行饱和策略，默认抛出RejectedExecutionException异常。
 
+结合下图，我们就能更好的理解线程池的原理了。
 
+<img src="https://raw.githubusercontent.com/NieJianJian/AndroidNotes/master/Picture/threadpoolexecutesketchmap.png" alt="图：线程池执行示意图 " style="zoom:80%;" />
+
+上图看到，执行ThreadPoolExecutor的execute方法， 会遇到各种情况：
+
+* 如果线程池中的线程数未达到核心线程数，则创建核心线程处理任务。
+* 如果线程数大于或者等于核心线程数，则将任务加入队列，线程池中的空闲线程会不断地从任务队列中取出任务进行处理。
+* 如果任务队列满了，并且线程数还没有达到最大线程数，则创建非核心线程去处理任务。
+* 如果线程数超过了最大线程数，则执行饱和策略。
+
+***
+
+#### 3. 线程池的种类
+
+通过直接或者间接地配置ThreadPoolExecutor的参数可以创建不同类型的ThreadPoolExecutor。
+
+* **FixedThreadPool**
+
+  一个有固定数量核心线程的线程池，并且核心线程不会被回收。
+
+  ```java
+  public static ExecutorService newFixedThreadPool(int nThreads) {
+      return new ThreadPoolExecutor(nThreads, nThreads, 
+                           0L, TimeUnit.MILLISECONDS,
+                              new LinkedBlockingQueue<Runnable>());
+  }
+  ```
+
+  * 只有核心线程，并且数量固定。
+  * 多余的线程会被立刻终止。因为没有非核心线程，所以keepAliveTime是无效参数。
+  * 采用无界阻塞队列LinkedBlockingQueue（容量默认Integer.MAX_VALUE）。
+
+* **CacheThreadPool**
+
+  一个根据需要创建线程的线程池。
+
+  ```java
+  public static ExecutorService newCachedThreadPool() {
+      return new ThreadPoolExecutor(0, Integer.MAX_VALUE, 
+                           60L, TimeUnit.SECONDS,
+                              new SynchronousQueue<Runnable>());
+  }
+  ```
+
+  * 没有核心线程，非核心线程是无界的。
+  * 空闲线程等待任务的最长时间是60s。
+  * 使用了不存储元素的阻塞队列SynchronousQueue。
+  * 由于maximumPoolSize是无界的，并且SynchronousQueue不存储元素，所以如果提交的任务速度大于线程池中线程处理任务的速度，就会不断的创建新线程。每次提交任务都立即有线程进行处理。
+  * CacheThreadPool比较适合大量的需要立即处理并且耗时少的任务。
+
+* **SingleThreadExecutor**
+
+  使用单个工作线程的线程池。
+
+  ```java
+  public static ExecutorService newSingleThreadExecutor() {     
+      return new Executors.FinalizableDelegatedExecutorService(
+              new ThreadPoolExecutor(1, 1, 
+                      0L, TimeUnit.MILLISECONDS,
+                      new LinkedBlockingQueue<Runnable>()));
+  }
+  ```
+
+  * 只有一个核心线程在执行任务。
+  * SingleThreadExecutor可以确保所有的任务在一个线程中按照顺序逐一执行。
+
+* **ScheduledThreadPool**
+
+  一个能够实现定时和周期性任务的线程池。
+
+  ```java
+  public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize) {
+      return new ScheduledThreadPoolExecutor(corePoolSize);
+  }
+  
+  public ScheduledThreadPoolExecutor(int corePoolSize) {
+      super(corePoolSize, Integer.MAX_VALUE,
+              0L, TimeUnit.NANOSECONDS,
+              new ScheduledThreadPoolExecutor.DelayedWorkQueue());
+  }
+  ```
+
+  * 由于采用的DelayedWorkQueue是无界的，所以maximumPoolSize参数是无效的。
+  * 当执行ScheduledThreadPoolExecutor的`scheduledAtFixedRate`或`scheduleWithFixedDelay`方法时，会向DelayedWorkQueue添加一个实现RunnableScheduledFuture接口的ScheduledFutureTask（任务的包装类），并会检查运行的线程是否达到corePoolSize。
+  * 如果没有则新建线程并启动它，但并不是立即执行任务，而是去DelayedWorkQueue中取ScheduledFutureTask，然后去执行任务。
+  * 如果运行的线程达到corePoolSize，则将任务添加到DelayedWorkQueue中。
+  * DelayedWorkQueue会将任务进行排序，先要执行的任务放在队列的前面。
+  * 当执行完任务后，会将ScheduledFutureTask中的time变量改为下次要执行的时间病房回到DelayedWorkQueue中。
+
+***
+
+#### 4. 线程池的使用准则
+
+* 不要对那些同步等待其它任务结果的任务排队。这可能会导致上面所描述的那种形式的死锁，在那种死锁中，所有线程都被一些任务所占用，这些任务依次等待排队任务的结果，而这些任务又无法执行，因为所有的线程都很忙。
+* 理解任务。要有效地调整线程池大小，您需要理解正在排队的任务以及它们正在做什么。它们是 CPU 限制的（CPU-bound）吗？它们是 I/O 限制的（I/O-bound）吗？您的答案将影响您如何调整应用程序。如果您有不同的任务类，这些类有着截然不同的特征，那么为不同任务类设置多个工作队列可能会有意义，这样可以相应地调整每个池。
+* 调整线程池的大小基本上就是避免两类错误：线程太少或线程太多。幸运的是，对于大多数应用程序来说，太多和太少之间的余地相当宽。
+* 在运行于具有 N 个处理器机器上的计算限制的应用程序中，在线程数目接近 N 时添加额外的线程可能会改善总处理能力，而在线程数目超过 N 时添加额外的线程将不起作用。事实上，太多的线程甚至会降低性能，因为它会导致额外的环境切换开销。
+* 线程池的最佳大小取决于可用处理器的数目以及工作队列中的任务的性质。若在一个具有 N 个处理器的系统上只有一个工作队列，其中全部是计算性质的任务，在线程池具有 N 或 N+1 个线程时一般会获得最大的 CPU 利用率。
+* 对于那些可能需要等待 I/O 完成的任务（例如，从套接字读取 HTTP 请求的任务），需要让池的大小超过可用处理器的数目，因为并不是所有线程都一直在工作。
+
+（2）
+
+（3）
 
 ***
 
