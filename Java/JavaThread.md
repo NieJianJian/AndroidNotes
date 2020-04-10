@@ -2,25 +2,26 @@
 
 ### 目录
 
-* [一. 线程基础]()
-  * [1. 进程与线程]()
-  * [2. 线程的状态]()
-  * [3. 线程的创建]()
-  * [4. 线程的终止]()
-* [二. 多线程]()
-  * [1. 线程间的协作]() 
-  * [2. 线程间的调度]()
-  * [3. 多线程相关方法——Callable、Future和FutureTask]()
-* [三. 同步]()
-  * [同步锁]() 
-  * [同步集合]()
-  * [阻塞队列]()
+* [一. 线程基础](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#一-线程基础)
+  * [1. 进程与线程](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#1-进程与线程)
+  * [2. 线程的状态](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#2-线程的状态)
+  * [3. 线程的创建](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#3-线程的创建)
+  * [4. 线程的终止](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#4-线程的终止)
+* [二. 多线程](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#二-多线程)
+  * [1. 线程间的协作](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#1-线程间的协作) 
+  * [2. 线程间的调度](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#2-线程间的调度)
+  * [3. 多线程相关方法——Callable、Future和FutureTask](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#3-多线程相关方法callablefuture和futuretask)
+* [三. 同步](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#三-同步)
+  * [同步锁](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#1-同步锁) 
+  * [同步集合](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#2-同步集合)
+  * [阻塞队列](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#3-阻塞队列)
   * [Java并发三大特性](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaConcurrent.md)
-* [四. 线程池]()
-  * [ThreadPoolExecutor]()
-  * [线程池处理流程和原理]()
-  * [线程池的种类]()
-  * [线程池的使用准则]()
+* [四. 线程池](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#四-线程池)
+  * [ThreadPoolExecutor](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#1-threadpoolexecutor)
+  * [线程池处理流程和原理](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#2-线程池处理流程和原理)
+  * [线程池的种类](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#3-线程池的种类)
+  * [线程池的使用准则](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#4-线程池的使用准则)
+* [附录：相关示例代码](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#附相关示例代码)
 
 ***
 
@@ -467,7 +468,7 @@ Callable、Future、futureTask只能运用在线程池，而Runnable即能运用
   }
   ```
 
-* [Runnable、Callable、FutureTask使用案例]()
+* [Runnable、Callable、FutureTask使用案例](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#1-runnablecallablefuturetask使用案例)
 
 ***
 
@@ -561,7 +562,7 @@ Callable、Future、futureTask只能运用在线程池，而Runnable即能运用
 
     上面是Condition的使用方法，相对来说synchronized关键字来编写代码，就简单多了，只需要给transfer方法加上synchronized关键字、condition.await()换成wait()、condition.signalAll()换成notifyAll()就可以了。
 
-  * [案例：ReentrantLock和Condition实现简单阻塞队列MyArrayBlockingQueue]()
+  * [案例：ReentrantLock和Condition实现简单阻塞队列MyArrayBlockingQueue](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#2-reentrantlock和condition实现简单阻塞队列myarrayblockingqueue)
 
 * **synchronized和ReentrantLock的比较**
 
@@ -585,19 +586,19 @@ Callable、Future、futureTask只能运用在线程池，而Runnable即能运用
 
   　　假设银行有3个窗口，要办业务5个人，同时只能有3个人办业务，另外两个人等待。许可集为3，占用窗口的人调用`acquire()`获取许可，离开时调用`release()`释放许可，后续的人才能获取许可。
 
-  * [Semaphore的示例]()
+  * [Semaphore的示例](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#3-semaphore的示例)
 
 * **循环栅栏CyclicBarrier**
 
   　　CyclicBarrier是一个同步辅助类，允许一组线程互相等待，直到到达某个公共屏障点。
 
-  * [CyclicBarrier的示例]()
+  * [CyclicBarrier的示例](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#4-cyclicbarrier的示例)
 
 * **闭锁CountDownLatch**
 
   　　CountDownLatch也是一个同步辅助类，在完成一组正在其他线程中执行的操作之前，它允许一个或多个线程一直等待，直到条件被满足。
 
-  * [CountDownLatch的示例]()
+  * [CountDownLatch的示例](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#5-countdownlatch的示例)
   * CountDownLatch和CyclicBarrier的不同点：
     *  CountDownLatch的作用是允许1个或者N个线程等待其他线程完成执行，而CyclicBarrier则是允许N个线程互相等待。
     *  CountDownLatch的计数器无法被重置，CyclicBarrier的计数器可以被重置后使用，因此它被称为是循环的barrier。
@@ -695,7 +696,7 @@ Callable、Future、futureTask只能运用在线程池，而Runnable即能运用
   * **LinkedTransferQueue**：由链表结构组成的无界阻塞队列
   * **LinkedBlockingDeque**：由链接结构组成的双向阻塞队列
 
-  [7个阻塞队列的详细介绍]()
+  [7个阻塞队列的详细介绍](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#6-7个阻塞队列的详细介绍)
 
   有界队列和无界队列的区别：
 
