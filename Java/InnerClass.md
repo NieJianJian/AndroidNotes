@@ -2,12 +2,12 @@
 
 ### 目录
 
-* [1. 简介]()
-* [2. 普通内部类]()
-* [3. 静态内部类]()
-* [4. 匿名内部类]()
-* [5. 局部内部类]()
-* [6. 深入了解内部类]()
+* [1. 简介](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/InnerClass.md#1-简介)
+* [2. 普通内部类](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/InnerClass.md#2-普通内部类)
+* [3. 静态内部类](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/InnerClass.md#3-静态内部类)
+* [4. 匿名内部类](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/InnerClass.md#4-匿名内部类)
+* [5. 局部内部类](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/InnerClass.md#5-局部内部类)
+* [6. 深入了解内部类](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/InnerClass.md#6-深入了解内部类)
 
 ***
 
