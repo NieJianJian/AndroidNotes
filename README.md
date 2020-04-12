@@ -9,7 +9,7 @@
 
 ## Java基础
 
-* [Java集合类]()
+* [Java集合类](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaCollection.md)
   * [HashMap原理解析](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/HashMap原理解析.md)
 * [JVM（JAVA虚拟机）]()
   * [JMM（Java内存模型）](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JMM.md)
