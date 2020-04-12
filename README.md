@@ -23,8 +23,7 @@
 * [Java反射](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/Java反射.md)
 * [代理模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/代理模式.md)
 * [Java注解](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/java注解.md)
-
-https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md
+* [Java内部类](https://github.com/NieJianJian/AndroidNotes/blob/master/InnerClass.md)
 
 ## Android进阶
 
