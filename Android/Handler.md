@@ -176,16 +176,22 @@ public final boolean sendMessageDelayed(Message msg, long delayMillis) {
     return sendMessageAtTime(msg, SystemClock.uptimeMillis() + delayMillis);
 }
 
-public boolean sendMessageAtTime(Message msg, long updateMillis) {
-    boolean sent = false;
+public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
     MessageQueue queue = mQueue;
-    if (queue != null) {
-        msg.target = this; // 设置消息的target为当前的Handler对象
-        sent = queue.enqueueMessage(msg, uptimeMillis); // 将消息插入到消息队列
-    } else {
-        // ......
+    if (queue == null) {
+        RuntimeException e = new RuntimeException(
+                this + " sendMessageAtTime() called with no mQueue");
+        return false;
     }
-    return sent;
+    return enqueueMessage(queue, msg, uptimeMillis);
+}
+
+private boolean enqueueMessage(MessageQueue queue, Message msg, long uptimeMillis) {
+    msg.target = this; // 设置消息的target为当前的Handler对象
+    if (mAsynchronous) {
+        msg.setAsynchronous(true);
+    }
+    return queue.enqueueMessage(msg, uptimeMillis); // 将消息插入到消息队列
 }
 ```
 
@@ -197,7 +203,7 @@ public final boolean sendMessage(Message msg) {
 }
 ```
 
-​		不管时post一个Runnable还是Message，都会调用sendMessage(msg, time)方法。Handler最终将消息追加到MessageQueue中，而Looper不断地从MessageQueue中读取消息，并且调用Handler的dispatchMessage方法，这样消息就能源源不断地被产生、添加到MessageQueue、被Handler处理。
+​		不管时post一个Runnable还是send一个Message，都会调用sendMessageAtTime(msg, time)方法。Handler最终将消息追加到MessageQueue中，而Looper不断地从MessageQueue中读取消息，并且调用Handler的dispatchMessage方法，这样消息就能源源不断地被产生、添加到MessageQueue、被Handler处理。
 
 #### 2.在子线程中创建Handler为何会抛出异常
 
@@ -253,7 +259,26 @@ new Thread() {
 
 参考链接：[Android中为什么主线程不会因为Looper.loop()里的死循环卡死？](https://www.zhihu.com/question/34652589)
 
+**问题2：Handler导致内存泄露的路径**
 
+　　Handler的声明方式一般为匿名内部类，这种情况可能会导致内存泄露。
+
+* 首先，匿名内部类会持有外部类的引用，也就是Handler会持有调用它的外部类的引用。
+
+* post或者send方法，最终都会调用到enqueueMessage方法中，方法中有如下一行代码
+
+  ```java
+  msg.target = this;
+  ```
+
+  设置Message的target字段为当前的Handler对象。
+
+* 结合上面的步骤，如果Message处理消息，没有处理完成，或者设置了delay，还没到执行的时间，外部的Activity销毁了，由于Handler持有Activity的引用，Message持有Handler的引用，Message会间接的持有外部Activity的引用，Message没有处理完成，或者还没来得及执行，是不会销毁的，也导致外部Activity无法销毁，从而导致了内存泄露。
+
+* **解决办法**
+
+  * 关闭Activity的时候，调用Handler的removeCallbackAndMessage(null)方法，取消所有排队的Message。
+  * 将Handler创建为静态内部类，静态内部类不会持有外部类的引用，并且使用WeakReference来包装外部类对象。当Activity想关闭销毁时，mHandler对它的弱引用没有影响，该销毁销毁；当mHandler通过WeakReference拿不到Activity对象时，说明Activity已经销毁了，就不用处理了，相当于丢弃了消息。
 
 
 
