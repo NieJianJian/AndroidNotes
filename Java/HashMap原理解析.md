@@ -38,8 +38,6 @@
 
   可以，重写hashcode()。String.class中有hashcode()重写方法，可以参考。
 
-* **hashmap的初始数组大小是如何决定的？**
-
 * **hashmap初始大小是否可以自定义？**
 
   ```java
