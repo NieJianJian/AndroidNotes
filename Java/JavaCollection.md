@@ -266,3 +266,5 @@ Map：key值不可重复，value值可重复。
 
 [HashMap相关问题](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/HashMap原理解析.md)
 
+[参考链接1](https://github.com/francistao/LearningNotes/blob/master/Part2/JavaSE/HashMap源码剖析.md)
+
