@@ -2,19 +2,19 @@
 
 ### 目录
 
-* [1. 网络分层]()
-* [2. TCP和UDP]()
-  * [2.1 TCP]()
-  * [2.2 UDP]()
-* [3. HTTP]()
-  * [3.1 HTTP简介]()
-  * [3.2 HTTP请求报文]()
-  * [3.3 HTTP响应报文]()
-  * [3.4 HTTP消息报头]()
-  * [3.5 HTTP请求方式]()
-* [4. HttpClient和HttpURLConnection]()
-  * [HttpClient]()
-  * [HttpURLConnection]()
+* [1. 网络分层](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#1-网络分层)
+* [2. TCP和UDP](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#2-tcp和udp)
+  * [2.1 TCP](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#21-tcp)
+  * [2.2 UDP](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#22-udp)
+* [3. HTTP](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#3-http)
+  * [3.1 HTTP简介](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#31-http简介)
+  * [3.2 HTTP请求报文](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#32-http请求报文)
+  * [3.3 HTTP响应报文](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#33-http响应报文)
+  * [3.4 HTTP消息报头](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#34-http消息报头)
+  * [3.5 HTTP请求方式](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#35-http请求方式)
+* [4. HttpClient和HttpURLConnection](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#4-httpclient和httpurlconnection)
+  * [HttpClient](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#41-httpclient)
+  * [HttpURLConnection](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#42-httpurlconnection)
 
 ***
 
@@ -505,6 +505,20 @@ HttpURLConnection的API简单，体积较小，非常适用与Android项目。Ht
 HttpURLConnection的POST请求代码如下：
 
 ```java
+private HttpURLConnection getHttpURLConnection(String url) throws IOException {
+    HttpURLConnection mHttpURLConnection = null;
+    URL mUrl = new URL(url);
+    mHttpURLConnection = (HttpURLConnection) mUrl.openConnection();
+    mHttpURLConnection.setConnectTimeout(1500);
+    mHttpURLConnection.setReadTimeout(1500);
+    mHttpURLConnection.setRequestMethod("POST");
+    mHttpURLConnection.setRequestProperty("Connection", "Keep-Alive");
+    mHttpURLConnection.setDoInput(true);
+    // post传递参数时，需要开启输入功能
+    mHttpURLConnection.setDoOutput(true);
+    return mHttpURLConnection;
+}
+
 public static void postParams(OutputStream output, List<NameValuePair> list)
         throws IOException {
     StringBuffer mStringBuilder = new StringBuffer();
