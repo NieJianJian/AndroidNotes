@@ -964,3 +964,12 @@ RealConnection是socket的物理连接的包装，List中的StreamAllocation数�
 ```
 
 该方法主要是针对HTTP/2场景下多个多路复用连接清除的场景。如果是当前连接是HTTP/2，那么所有指向该站点的请求都应该基于同一个TCP连接。
+
+***
+
+### 参考链接
+
+[OKHttp源码解析(九)](https://www.jianshu.com/p/6166d28983a2)
+
+[okhttp之StreamAllocation](https://www.jianshu.com/p/fbbb018ceb64)
+

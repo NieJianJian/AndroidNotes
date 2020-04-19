@@ -12,6 +12,7 @@
   * [3.3 HTTP响应报文](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#33-http响应报文)
   * [3.4 HTTP消息报头](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#34-http消息报头)
   * [3.5 HTTP请求方式](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#35-http请求方式)
+  * [3.6 HTTP拓展知识](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#36-http拓展知识)
 * [4. HttpClient和HttpURLConnection](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#4-httpclient和httpurlconnection)
   * [HttpClient](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#41-httpclient)
   * [HttpURLConnection](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#42-httpurlconnection)
@@ -398,9 +399,72 @@ HTTP响应报文由状态行、响应包头、空行、响应正文4个部分组
 
   OPTIONS方法请求Web服务器告知其所支持的各种功能。
 
+* CONNECT
+
+  要求与代理服务器通信时建立隧道，实现用隧道协议进行TCP通信。
+
 * GET和DELETE的URL最大长度为1024字节，也就是1KB。
 
 * PUT和POST它们的报文格式一般是表单形式，也就是说这两个请求方式的参数存储在报文的请求数据上。
+
+***
+
+#### 3.6 HTTP拓展知识
+
+* SSL
+
+  Secure Sockets Layer ，是安全套接字协议。为了解决HTTP明文传输的不安全性（虽然POST提交的数据在报体中看不到，但是可以通过抓包工具窃取到）。SSL是基于HTTP之下TCP之上的一个协议层（也就是传输层和应用层之间），是基于HTTP标准并对TCP传输数据时进行加密。
+
+* HTTPS
+
+  Hyper Text Transfer Protocol over SecureSocket Layer，是安全层套接字层的超文本传输协议。
+
+  HTTPS = HTTP + SSL。
+
+* TLS
+
+  Transport Layer Security，是传输层安全协议。SSL协议是TLS协议的前身。
+
+* SOCKS
+
+  
+
+* DNS
+
+  域名系统（Domain Name System缩写DNS，Domain Name被译为域名）是因特网的一项核心服务，它作为可以将域名和IP地址相互映射的一个分布式数据库，能够使人更方便的访问互联网，而不用去记住能够被机器直接读取的IP数串。
+
+  **作用**：用来解析域名。互联网中其实不存在www.xxx.com这样域名方式，而是255.255.255.255这样的IP地址，访问域名www.xxx.com，DNS服务器会将域名映射到对应的IP地址上，从而完成域名解析。（域名方便记忆）
+
+* DNS寻址过程
+
+  这里用浏览器访问www.baidu.com来举例。
+
+  * 先从浏览器缓存中查找是否有域名对应的ip地址。如果找到，域名解析结束。
+  * 浏览器缓存未找到，则到操作系统中去查找，比如C盘的hosts文件。
+  * 如果操作系统找不到的话，就访问本地DNS服务器（本地DNS应该是指电脑里设置的IPv4中填写的DNS地址，或者是DHCP自动分配的。连接路由器的话，就是路由器分配的DNS地址。也比如直接连接网络就是运营商的DNS），绝大多数到这一步就结束了。
+  * 本地DNS找不到，就去请求根DNS服务器（域名解析起点）。
+  * 根DNS服务器根据请求的域名的根域部分（比如.com），返回相应的下一级DNS服务器的地址。
+  * 本地DNS访问下一级DNS服务器，这样递归的方法一级一级查找，直到找到相应的IP地址并返回。
+  * 本地DNS将查询到的ip地址返回给浏览器。
+  * 浏览器根据得到的ip地址去访问目标主机，完成访问。
+
+* 代理
+
+  客户端和服务器的"中间人"，进行接收和转发。
+
+* 网关
+
+  网关的工作机制和代理十分相似。而网关能使通信线路上的服务器提供非 HTTP 协议服务。
+
+  假设：IP=10.1.1.2，Mask = 255.255.255.0，Gateway = 10.1.1.1
+
+  * 自己和自己通信（10.1.1.2）：流量在主机内溜达，不会触碰网线
+  * 与广播域内其他主机（10.1.1.x）通信：通过ARP广播发现其它主机的MAC，这些流量在主机间穿梭，不会到达网关。
+  * 与主机外通信：访问外网会通过网关。
+
+* 隧道（Tunnel）
+
+  在相隔甚远的客户端和服务器之间进行中转，并保持双方通信连接的应用程序。隧道本身不去解析HTTP请求，请求保持原样中转给之后的服务器。
 
 ***
 
@@ -552,3 +616,10 @@ public static void postParams(OutputStream output, List<NameValuePair> list)
 [TCP 为什么是三次握手，而不是两次或四次](https://www.zhihu.com/question/24853633)
 
 [一文搞懂TCP和UDP](https://www.cnblogs.com/fundebug/p/differences-of-tcp-and-udp.html)
+
+[代理，网关，隧道，有什么区别与联系](https://www.idcbest.com/idcnews/11003815.html)
+
+[代理，网关，隧道，有什么区别与联系？](https://www.zhihu.com/question/268204483)
+
+[什么是HTTP隧道，怎么理解HTTP隧道呢？](https://www.zhihu.com/question/21955083)
+

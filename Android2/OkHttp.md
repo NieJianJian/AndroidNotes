@@ -812,3 +812,13 @@ CacheInterceptor的具体逻辑：
 
 [ OkHttp核心——StreamAllocation、ConnectionPool、RealConnection](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/OkHttp_core.md)
 
+
+
+***
+
+### 参考链接
+
+[OkHttp之getResponseWithInterceptorChain（一）](https://blog.csdn.net/nihaomabmt/article/details/88187205)
+
+[OkHttp之getResponseWithInterceptorChain（二）](https://blog.csdn.net/nihaomabmt/article/details/88416148)
+
