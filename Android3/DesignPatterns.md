@@ -227,6 +227,12 @@ public class Singleton {
 
 在程序初始化的时候，将多种单例类型注入到一个统一的管理类中，根据key获取对应的对象。
 
+#### 4. 源码中的应用
+
+* LayoutInflater类
+
+  Android中经常通过你过Context获取系统级别的服务，这些服务会在合适的时候以单例的形式注册到系统中，需要的时候通过Context的getSystemService(String name)获取。
+
 ***
 
 ***
@@ -279,7 +285,11 @@ private void showDialog(Context context) {
 } 
 ```
 
-#### 4. 总结
+#### 4. 源码中的应用
+
+* AlertDialog.Builder
+
+#### 5. 总结
 
 Builder模式通常做为配置累的构建器将配置的构建与表示分离开来，同时也是将配置从目标类中隔离开来，避免过多的setter方法。
 
@@ -402,7 +412,23 @@ public static void main(String[] args) {
 }
 ```
 
-#### 4. 总结
+#### 4. 源码中的应用
+
+* Activity的onCreate方法
+
+  ```java
+  public class MainActivity extends Activity {
+      @Override
+      protected void onCreate(Bundle savedInstanceState) {
+          super.onCreate(savedInstanceState);
+          setContentView(new LinearLayout(this));
+      }
+  }
+  ```
+
+  通过new创建一个View对象，并设置给当前界面的ContentView，这就是工厂模式。
+
+#### 5. 总结
 
 优点：
 
@@ -632,7 +658,13 @@ public class PriceCalculator {
 }
 ```
 
-#### 4. 总结
+#### 5. 源码中的实现
+
+* 时间插值器
+
+  动画中的TimeInterpolator，也就是时间插值器，就是策略模式的典型运用。
+
+#### 5. 总结
 
 优点：
 
@@ -716,7 +748,13 @@ public static void main(String[] args) {
 }
 ```
 
-#### 4. 总结
+#### 4. 源码中的应用
+
+* dispatchTouchEvent
+
+  Android中的事件分发处理。
+
+#### 5. 总结
 
 优点：
 
@@ -801,7 +839,28 @@ public static void main(String[] args) {
 }
 ```
 
-#### 4. 总结
+#### 4. 源码中的应用
+
+* Adapter
+
+  ListView添加数据都会调用Adapter的notifyDataSetChanged()方法。
+
+  ```java
+  public abstract class BaseAdapter implements ListAdapter, SpinnerAdapter {
+      private final DataSetObservable mDataSetObservable = new DataSetObservable();
+      public void registerDataSetObserver(DataSetObserver observer) {
+          mDataSetObservable.registerObserver(observer);
+      }
+      public void unregisterDataSetObserver(DataSetObserver observer) {
+          mDataSetObservable.unregisterObserver(observer);
+      }
+      public void notifyDataSetChanged() {
+          mDataSetObservable.notifyChanged();
+      }
+  }
+  ```
+
+#### 5. 总结
 
 主要作用：对象解耦，将观察者和被观察者完全隔离，只依赖于Observer和Observable。
 
@@ -871,6 +930,14 @@ public static void main(String[] args) {
     proxy.visit();
 }
 ```
+
+#### 4. 源码中的实现
+
+* ActivityManagerProxy
+
+  其具体代理的是ActivityManagerNative的子类ActivityManagerService。
+
+* AIDL
 
 ***
 
@@ -952,7 +1019,13 @@ public static void main(String[] args) {
 }
 ```
 
-#### 4. 总结
+#### 4. 源码中的应用
+
+* Context
+
+  Context是抽象类，具体实现类ContextImpl，装饰类是ContextWrapper。
+
+#### 5. 总结
 
 优点：
 
