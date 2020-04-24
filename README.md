@@ -31,7 +31,10 @@
 * [AIDL](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/AIDL.md)
 * [OkHttp源码解析](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/OkHttp.md)
 * [Retrofit源码解析]()
-* [设计模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/DesignPatterns.md)
+
+## Android架构
+
+* [设计模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Android3/DesignPatterns.md)
 
 ## 网络编程
 
