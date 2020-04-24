@@ -2,17 +2,17 @@
 
 ### 目录
 
-* [面向对象六大原则]()
-* [设计模式分类]()
-* [单例模式]()
-* [Builder模式]()
-* [工厂模式]()
-* [抽象工厂模式]()
-* [策略模式]()
-* [责任链模式]()
-* [观察者模式]()
-* [代理模式]()
-* [装饰模式]()
+* [面向对象六大原则](https://github.com/NieJianJian/AndroidNotes/blob/master/Android3/DesignPatterns.md#面向对象六大原则)
+* [设计模式分类](https://github.com/NieJianJian/AndroidNotes/blob/master/Android3/DesignPatterns.md#设计模式分类)
+* [单例模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Android3/DesignPatterns.md#单例模式)
+* [Builder模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Android3/DesignPatterns.md#builder模式)
+* [工厂模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Android3/DesignPatterns.md#工厂模式)
+* [抽象工厂模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Android3/DesignPatterns.md#抽象工厂模式)
+* [策略模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Android3/DesignPatterns.md#策略模式)
+* [责任链模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Android3/DesignPatterns.md#责任链模式)
+* [观察者模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Android3/DesignPatterns.md#观察者模式)
+* [代理模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Android3/DesignPatterns.md#代理模式)
+* [装饰模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Android3/DesignPatterns.md#装饰模式)
 
 ***
 
