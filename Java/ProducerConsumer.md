@@ -406,7 +406,7 @@ public class Waiter extends Thread {
 }
 ```
 
-* Waiter类种有两次同样的判断，第二次，是为了保证当前Waiter对象调用了take方法，返回了最后一个Food对象，处理完之后，结束当前Waiter线程对象；第一次判断，是为了防止其他Waiter线程对象调用到take方法时，由于已经没有了元素，造成了阻塞，无法停止，根据相关判断，直接return。
+* Waiter类中有两次同样的判断，第二次，是为了保证当前Waiter对象调用了take方法，返回了最后一个Food对象，处理完之后，结束当前Waiter线程对象；第一次判断，是为了防止其他Waiter线程对象调用到take方法时，由于已经没有了元素，造成了阻塞，无法停止，根据相关判断，直接return。
 
 接下来定义Restaurant类，代表餐馆真实发生的事情：
 
@@ -414,12 +414,12 @@ public class Waiter extends Thread {
 public class Restaurant {
     public static void main(String[] args) {
         BlockingQueue<Food> queue = new ArrayBlockingQueue<Food>(5);
-        new Cook2(queue, "1号厨师").start();
-        new Cook2(queue, "2号厨师").start();
-        new Cook2(queue, "3号厨师").start();
-        new Waiter2(queue, "1号服务员").start();
-        new Waiter2(queue, "2号服务员").start();
-        new Waiter2(queue, "3号服务员").start();
+        new Cook(queue, "1号厨师").start();
+        new Cook(queue, "2号厨师").start();
+        new Cook(queue, "3号厨师").start();
+        new Waiter(queue, "1号服务员").start();
+        new Waiter(queue, "2号服务员").start();
+        new Waiter(queue, "3号服务员").start();
     }
 }
 ```
