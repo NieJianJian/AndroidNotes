@@ -15,6 +15,7 @@
   * [三. 同步](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#三-同步)
   * [四. 线程池](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#四-线程池)
   * [Java并发三大特性](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaConcurrent.md)
+  * [生产者-消费者模型](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/ProducerConsumer.md)
 * [JVM（JAVA虚拟机）]()
   * [JMM（Java内存模型）](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JMM.md)
 * [Java集合类](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaCollection.md)

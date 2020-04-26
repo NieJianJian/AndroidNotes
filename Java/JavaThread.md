@@ -16,6 +16,7 @@
   * [同步集合](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#2-同步集合)
   * [阻塞队列](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#3-阻塞队列)
   * [Java并发三大特性](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaConcurrent.md)
+  * [生产者-消费者模型](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/ProducerConsumer.md)
 * [四. 线程池](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#四-线程池)
   * [ThreadPoolExecutor](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#1-threadpoolexecutor)
   * [线程池处理流程和原理](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#2-线程池处理流程和原理)
@@ -584,7 +585,7 @@ Callable、Future、futureTask只能运用在线程池，而Runnable即能运用
 
   　　Semaphore是一个计数信号量，它的本质是一个"共享锁"。信号量维护一个信号量许可集，调用`acquire()`来获取信号量许可。当信号量中有可用许可时，线程获取该许可，否则线程必须等待，直到有可用的许可。线程通过`release()`来释放它所持有的许可。
 
-  　　假设银行有3个窗口，要办业务5个人，同时只能有3个人办业务，另外两个人等待。许可集为3，占用窗口的人调用`acquire()`获取许可，离开时调用`release()`释放许可，后续的人才能获取许可。
+    　　假设银行有3个窗口，要办业务5个人，同时只能有3个人办业务，另外两个人等待。许可集为3，占用窗口的人调用`acquire()`获取许可，离开时调用`release()`释放许可，后续的人才能获取许可。
 
   * [Semaphore的示例](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#3-semaphore的示例)
 
