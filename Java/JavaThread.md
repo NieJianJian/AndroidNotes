@@ -160,7 +160,7 @@
 
   * 如果一个线程被阻塞，就无法检测中断状态。
 
-  * 如果一个线程处于阻塞状态，线程在检查中断标识位时如果发现中断标识位为true，则会在阻塞方法出抛出InterruptedException异常，并且抛出异常前将中断标识位复位，设置为false。被中断的现成不一定会终止，中断是为了引起线程的注意，可以捕获异常进行处理。
+  * 如果一个线程处于阻塞状态，线程在检查中断标识位时如果发现中断标识位为true，则会在阻塞方法出抛出InterruptedException异常，并且抛出异常前将中断标识位复位，设置为false。被中断的线程不一定会终止，中断是为了引起线程的注意，可以捕获异常进行处理。
 
     ```java
     public class TestCallable extends Thread {
@@ -393,7 +393,7 @@
 
 #### 3. 多线程相关方法——Callable、Future和FutureTask
 
-Callable、Future、futureTask只能运用在线程池，而Runnable即能运用在Thread中，也能运用在线程池中。
+Callable、Future、FutureTask只能运用在线程池，而Runnable既能运用在Thread中，也能运用在线程池中。
 
 * **Callable**有返回值，Runnable没有返回值。
 
@@ -500,7 +500,7 @@ Callable、Future、futureTask只能运用在线程池，而Runnable即能运用
 
   `syncMethod`和`syncThis`锁的是对象，`syncClassMethod`和`syncStiticMethod`锁的是class对象。
 
-  * 作用与引用对象，是防止多个线程同时访问添加了synchronized锁的代码块。
+  * 作用于引用对象，是防止多个线程同时访问添加了synchronized锁的代码块。
   * 作用于class对象，是防止其他线程访问同一个对象中的synchronized代码块或者函数。
 
   **Java中每一个对象都有一个内部锁，并且该锁有一个内部条件**。由该锁来管理那些试图进入synchronized方法的线程，由该锁的条件来管理那些调用wait的线程。

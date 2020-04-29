@@ -16,6 +16,7 @@
   * [四. 线程池](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#四-线程池)
   * [Java并发三大特性](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaConcurrent.md)
   * [生产者-消费者模型](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/ProducerConsumer.md)
+  * [ThreadLocal详解](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/ThreadLocal.md)
 * [JVM（JAVA虚拟机）]()
   * [JMM（Java内存模型）](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JMM.md)
 * [Java集合类](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaCollection.md)
@@ -32,6 +33,8 @@
 * [AIDL](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/AIDL.md)
 * [OkHttp源码解析](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/OkHttp.md)
 * [Retrofit源码解析]()
+* [Android性能优化](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/PerformanceOptimization.md)
+* [Android内存泄露](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/MemoryLeak.md)
 
 ## Android架构
 
