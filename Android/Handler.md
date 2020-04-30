@@ -218,7 +218,7 @@ new Thread() {
 }.start();
 ```
 
-​		前面说过，Looper对象是ThreadLocal地，即每个线程都有自己地Looper，这个Looper可以为空。但是，当你要在子线程中创建Handler对象时，如果Looper为空，那么就会抛出"Can't create handler inside thread that has not called Looper.prepare()"异常。为什么会这样？看源代码：
+​		前面说过，Looper对象是ThreadLocal的，即每个线程都可以有自己的Looper，默认创建线程是没有Looper的，这个Looper可以为空。但是，当你要在子线程中创建Handler对象时，如果Looper为空，那么就会抛出"Can't create handler inside thread that has not called Looper.prepare()"异常。为什么会这样？看源代码：
 
 ```java
 public Handler {
