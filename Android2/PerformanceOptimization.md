@@ -6,6 +6,7 @@
 * Bitmap优化
 * ListView优化
 * 内存优化
+* APP启动白屏优化
 * 相关工具
 
 ***
@@ -88,6 +89,77 @@ Android应用采用沙箱机制，每个应用（进程）分配的内存大小�
 
 ***
 
+### APP启动白屏优化
+
+**Q**：为什么出现白屏（或黑屏）？
+
+　　一个应用程序从桌面点击图标开始，经历了：Zygote进程分配新进程 —> Application的构造 —> attachBaseContext()  —> onCreate() —> 第一个Activity的构造  —> onCreate() —> 配置主题中背景等属性 —> onStart() —> onResume() —> 测量布局绘制显示到屏幕上。
+
+　　当上述流程都走完，最终才能看到SplashActivity的第一眼。在构建这一切的时候，屏幕上显示的是手机默认主题颜色——白色或黑色。**这就是为什么APP启动会出现白屏**。
+
+白屏的持续的时间，主要是这一系列过程的耗时，在这期间，如果增加Application和Activity的onCreate的相关方法的执行复杂度，耗时就会增加，相应的白屏的时间也会增加。
+
+实际上，白屏的显示其实是一个StartingWindow，它是一个准备过程，当用户点击应用图标，系统马上显示的就是StartingWindow，当UI的第一帧渲染好之后，StartingWindow会自动移除。
+
+**解决白屏的方案**
+
+首先，Application的默认主题内容如下：
+
+```java
+<style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <!-- Customize your theme here. -->
+    <item name="colorPrimary">@color/colorPrimary</item>
+    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    <item name="colorAccent">@color/colorAccent</item>
+</style>
+```
+
+```java
+<application
+    ...
+    android:theme="@style/AppTheme">
+</application>
+```
+
+上述内容也是默认白屏的原因。
+
+* 解决方案一：**设置透明背景主题**
+
+  ```java
+  <style name="WelcomeTheme" parent="AppTheme">
+      <item name="android:windowFullscreen">true</item> // 冲满屏幕
+      <item name="android:windowIsTranslucent">true</item> // 设置背景透明
+  </style>
+  ```
+
+  ```java
+  <application
+      ...
+      android:theme="@style/WelcomeTheme">
+  </application>
+  ```
+
+  将App的背景设置为透明的，这样在应用启动的时候，就不会出现白屏现象。
+
+  不过，这样处理的话，虽然不会出现白屏，并不能真正解决问题，启动它仍然需要花费白屏通的时间，点击桌面图标，反而会给人一种停顿的感觉。
+
+* 解决方案二：**设置背景图片**
+
+  这是一种伪解决方案，我们注意下天猫或京东这些应用就是这么处理的。
+
+  ```java
+  <style name="WelcomeTheme" parent="AppTheme">
+      <item name="android:windowFullscreen">true</item> // 冲满屏幕
+      <item name="android:windowBackground">@mipmap/bg_splash</item> // 设置背景透明
+  </style>
+  ```
+
+  将主题中的背景图片设置成和启动页一样的背景图，这样会加长背景图显示的时长，给人一种直接进入启动页的感觉。
+
+* [Android 性能优化(一) —— 启动优化提升60%](https://blog.csdn.net/qian520ao/article/details/81908505)
+
+***
+
 ### 相关工具
 
 #### 1. 检测UI渲染时间工具
@@ -147,13 +219,13 @@ Android Lint 是 SDK Tools 16（ADT 16）开始引入的一个代码扫描工具
 
 您可以通过在 `<issue>` 标记中设置严重级别属性来更改某个问题的严重级别或对该问题停用 lint 检查。
 
-作者：凯玲之恋
-链接：https://www.jianshu.com/p/a0f28fbef73f
-来源：简书
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
-
 ### 参考链接
 
 * [Android代码内存优化建议-OnTrimMemory优化](https://www.jianshu.com/p/5b30bae0eb49)
 * [性能优化工具（六）-Layout Inspector](https://www.jianshu.com/p/1b64024f2d08)
 * [通过 lint 检查改进代码](https://developer.android.google.cn/studio/write/lint#studio_config)
+* [Android 应用白屏、黑屏、闪屏解决方法 (秒开应用思路)](https://blog.csdn.net/u011418943/article/details/88537446)
+* [Android - 启动白屏分析与优化](https://www.jianshu.com/p/cdbdfa5a5319?utm_campaign=haruki&utm_content=note&utm_medium=reader_share&utm_source=qq)
+* [Android APP应用启动页白屏(StartingWindow)优化](https://www.cnblogs.com/whycxb/p/9312914.html)
+* [Android 性能优化(一) —— 启动优化提升60%](https://blog.csdn.net/qian520ao/article/details/81908505)
+
