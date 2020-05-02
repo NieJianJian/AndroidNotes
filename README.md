@@ -7,6 +7,7 @@
  * [Handler原理](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Handler.md)
  * [View事件分发](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/ViewDispatchEvent.md)
  * [Android多线程实现方式](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/AndroidMultiThread.md)
+ * [RecyclerView和ListView缓存机制](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/RecyclerView.md)
 
 ## Java基础
 
