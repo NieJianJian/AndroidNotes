@@ -12,6 +12,7 @@
 
 ## Java基础
 
+* [Java基础知识](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaBasics.md)
 * [Java线程](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md)
   * [一. 线程基础](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#一-线程基础)
   * [二. 多线程](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#二-多线程)
