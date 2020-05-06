@@ -240,6 +240,8 @@ Map：key值不可重复，value值可重复。
 
 * Java 1.8采用红黑树结构。
 
+* [HashMap相关问题](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/HashMap原理解析.md)
+
 ***
 
 #### 5. HashTable
@@ -249,6 +251,9 @@ Map：key值不可重复，value值可重复。
 * 实现Serializable接口，支持序列化。实现Cloneable接口，可以被克隆。
 * 容量初始值为11，加载因子为0.75。扩容时容量为原来的2倍加1。
 * key和value不允许为null。如果为null，编译可通过，运行时报错。
+  * value判断为null，直接抛出异常
+  * key为null，调用hashCode()方法时抛出异常。
+  * hashMap的key为进行hashCode运算时，key为null返回的是0，不为null才进行运算。
 
 ***
 
@@ -262,8 +267,6 @@ Map：key值不可重复，value值可重复。
 ***
 
 #### 7. 深入HashMap
-
-[HashMap相关问题](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/HashMap原理解析.md)
 
 [参考链接1](https://github.com/francistao/LearningNotes/blob/master/Part2/JavaSE/HashMap源码剖析.md)
 

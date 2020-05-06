@@ -87,6 +87,8 @@
 * **HashMap的key是否可以为null，null如何存储。**
 
   key可以为null，
+  
+  null值放在table[0]的位置。
 
 
 
