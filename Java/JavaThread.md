@@ -10,7 +10,8 @@
 * [二. 多线程](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#二-多线程)
   * [1. 线程间的协作](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#1-线程间的协作) 
   * [2. 线程间的调度](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#2-线程间的调度)
-  * [3. 多线程相关方法——Callable、Future和FutureTask](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#3-多线程相关方法callablefuture和futuretask)
+  * [3. 线程的死锁](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#3-线程的死锁)
+  * [4. 多线程相关方法——Callable、Future和FutureTask](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#4-多线程相关方法callablefuture和futuretask)
 * [三. 同步](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#三-同步)
   * [同步锁](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#1-同步锁) 
   * [同步集合](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaThread.md#2-同步集合)
@@ -391,7 +392,11 @@
 
 ***
 
-#### 3. 多线程相关方法——Callable、Future和FutureTask
+#### 3. 线程的死锁
+
+
+
+#### 4. 多线程相关方法——Callable、Future和FutureTask
 
 Callable、Future、FutureTask只能运用在线程池，而Runnable既能运用在Thread中，也能运用在线程池中。
 
