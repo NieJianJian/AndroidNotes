@@ -206,13 +206,13 @@ public class User implements Parcelable {
 
 Parcelable方法说明表如下：
 
-| 方法                                | 功能                                                         | 标记位 |
-| ----------------------------------- | ------------------------------------------------------------ | ------ |
-| createFormParcel(Parcel in)         | 从序列化后的对象中创建原始对象                               |        |
-| newArray(int size)                  | 创建指定长度的原始对象数组                                   |        |
-| User(Parcel in)                     | 从序列化后的对象中创建原始对象                               |        |
-| writeToParcel(Parcel out,int flags) | 将当前对象写入序列化结构中，其中flags标识有两种值：0或1。当为1时当前对象需要作为返回值返回，不能立即释放资源，几乎所有情况都为0。 |        |
-| describeContents                    | 放回当前对象的内容描述。如果含有文件描述，返回1，否则返回0，机会所有情况都是0。 |        |
+| 方法                                | 功能                                                         |
+| ----------------------------------- | ------------------------------------------------------------ |
+| createFormParcel(Parcel in)         | 从序列化后的对象中创建原始对象                               |
+| newArray(int size)                  | 创建指定长度的原始对象数组                                   |
+| User(Parcel in)                     | 从序列化后的对象中创建原始对象                               |
+| writeToParcel(Parcel out,int flags) | 将当前对象写入序列化结构中，其中flags标识有两种值：0或1。当为1时当前对象需要作为返回值返回，不能立即释放资源，几乎所有情况都为0。 |
+| describeContents                    | 放回当前对象的内容描述。如果含有文件描述，返回1，否则返回0，机会所有情况都是0。 |
 
 系统提供了实现Parcelable接口的类，如Intent、Bundle、Bitmap等。List和Map也能序列化，前提是他们里面的每个元素都是可序列化的。
 

@@ -260,7 +260,7 @@ AIDL可以实现跨进程的方法调用，Messenger无法做到。
    * 首先，它声明了getBookList和addBook两个方法。这是在IBookManager.adil中所声明的方法，
    * 声明了两个整型的id分别用于标识上述两个方法。这两个id用于在transact过程中区分客户端所请求的到底是哪个方法。
    * 声明一个内部类Stub，这个Stub是一个Binder类。
-   * 当客户端和服务端位于同一个进程的时候，方法调用不会走跨进城的transact过程；当两个位于不同进程时，方法调用需要走transact过程。这个逻辑由Stub的内部代理类Proxy来完成。
+   * 当客户端和服务端位于同一个进程的时候，方法调用不会走进程的transact过程；当两个位于不同进程时，方法调用需要走transact过程。这个逻辑由Stub的内部代理类Proxy来完成。
 
    这个接口的核心是它的内部类Stub和Stub的内部代理类Proxy，下面介绍这两个类中方法的含义：
 
