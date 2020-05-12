@@ -36,7 +36,7 @@ Instant Run中 的资源热修复可以简单概括为以下两个步骤：
 
 > Dex分包方案主要做的是在打包时将应用代码分为多个Dex，将应用启动时需要用到的类和这些类的直接引用类放到主Dex中，其他代码放到次dex中。当应用启动时先加载主Dex，等到应用启动后再动态地加载次Dex。从而缓解了主Dex的65536限制和LinearAlloc限制。
 
-ClassLoader的加载过程，其中一个缓解就是调用DexPathList的`findClass`方法，如下：
+ClassLoader的加载过程，其中一个环节就是调用DexPathList的`findClass`方法，如下：
 
 ```java
 public Class<?> findClass(String name, List<Throwable> suppressed) {

@@ -663,7 +663,7 @@ private final class ServiceHandler extends Handler {
 ```
 
 * Handler中会调用onHandleIntent方法，并继续传递intent参数，该方法是一个抽象方法，需要我们在子类中去实现。
-* onHandleIntent方法执行结束后，会执行stopSelf(int startId)方法来尝试停止服务。这里没有采用stopSelf()时因为stopSelf()会立即停止服务，而这个时候可能还有消息未处理，stopSelf(int startId)会等待所有的消息处理完毕后才终止服务。
+* onHandleIntent方法执行结束后，会执行stopSelf(int startId)方法来尝试停止服务。这里没有采用stopSelf()是因为stopSelf()会立即停止服务，而这个时候可能还有消息未处理，stopSelf(int startId)会等待所有的消息处理完毕后才终止服务。
 * stopSelf(int startId)在尝试停止服务之前会判断最近启动的服务的次数是否和startId相等，如果相等就立即停止服务，不相等则不停止服务。
 
 #### 总结
