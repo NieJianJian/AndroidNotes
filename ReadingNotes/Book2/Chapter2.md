@@ -229,7 +229,7 @@ memcpy(smeth, dmeth, sizeof(ArtMethod));
 
   **static 和 final static修饰field的区别**，如下：
 
-  * final static修饰的**原始类型**和**`String`类型域**（非引用类型），并不会被编译在clinit方法中，而是在类初始化执行initSFields方法时得到了初始化赋值。
+  * final static修饰的**原始类型和`String`类型域**（非引用类型），并不会被编译在clinit方法中，而是在类初始化执行initSFields方法时得到了初始化赋值。
   * final static修饰的**引用变量**，初始化仍然在clinit方法中。
 
 * (2)**final static域优化原理**

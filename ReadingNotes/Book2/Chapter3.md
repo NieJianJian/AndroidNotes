@@ -118,7 +118,7 @@ class A {
 
 ### 3.1 冷启动类加载修复
 
-　　如果一个类直接引用到的所有非系统类都和该类再同一个dex中的话，那么这个类会被打上`CLASS_ISPREVERIFIED`标志。
+　　如果一个类直接引用到的所有非系统类都和该类在同一个dex中的话，那么这个类会被打上`CLASS_ISPREVERIFIED`标志。
 
 　　类似于QFix和Tinker这类插入dex的方案，最大的问题是**如何解决Dalvik虚拟机下类的pre-verify问题**？
 

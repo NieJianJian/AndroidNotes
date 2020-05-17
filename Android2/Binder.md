@@ -45,4 +45,9 @@ ADIL文件是实现Binder的一种方式，也就是说，AIDL并不是实现Bin
   binder.linkToDeath(mDeathRecipient, 0);
   ```
 
-  
+
+***
+
+### 参考文章
+
+* [Binder系列—开篇](http://gityuan.com/2015/10/31/binder-prepare/)

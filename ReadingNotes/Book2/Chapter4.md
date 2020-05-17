@@ -4,7 +4,7 @@
 
 Instant Run中的资源热修复分为两步：
 
-* 1.构造一个新的AssetManager，并通过反射调用addAssetPath，把这个完整的新资源包加入到AssetManager中。这样就得到一个含有所有新资源的AssetManager。
+* 构造一个新的AssetManager，并通过反射调用addAssetPath，把这个完整的新资源包加入到AssetManager中。这样就得到一个含有所有新资源的AssetManager。
 * 找到所有之前应用到原有AssetManager的地方，通过反射，把引用处替换为新AssetManager。
 
 大量的代码都是在处理兼容性问题，并找到所有AssetManager的引用处。其中的重点，是addAssetPath这个函数，底层实现逻辑如下：

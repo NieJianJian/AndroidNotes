@@ -4,8 +4,8 @@
 
  * [Git命令](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Git%E5%91%BD%E4%BB%A4.md)
  * [Handler原理](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Handler.md)
- * [View事件分发](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/ViewDispatchEvent.md)
- * [View测量宽高得四种方式](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View%E6%B5%8B%E9%87%8F%E5%AE%BD%E9%AB%98%E5%BE%97%E5%9B%9B%E7%A7%8D%E6%96%B9%E5%BC%8F.md)
+ * [View体系](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View.md)
+ * [View事件分发](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View/ViewDispatchEvent.md)
  * [Android动画](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Animation.md)
  * [Android多线程实现方式](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/AndroidMultiThread.md)
  * [RecyclerView和ListView缓存机制](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/RecyclerView.md)
@@ -35,6 +35,7 @@
 * [64K问题(MultiDex 分包)](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/64K问题-MultiDex分包.md)
 * [IPC机制](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/IPC.md)
 * [AIDL](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/AIDL.md)
+* [注解处理器](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/AnnotationProcessor.md)
 * [OkHttp源码解析](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/OkHttp.md)
 * [Retrofit源码解析]()
 * [Android性能优化](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/PerformanceOptimization.md)
