@@ -5,7 +5,7 @@
  * [Git命令](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Git%E5%91%BD%E4%BB%A4.md)
  * [Handler原理](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Handler.md)
  * [View体系](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View.md)
- * [View事件分发](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View/ViewDispatchEvent.md)
+ * [View事件分发和拦截](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View/ViewDispatchEvent.md)
  * [Android动画](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Animation.md)
  * [Android多线程实现方式](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/AndroidMultiThread.md)
  * [RecyclerView和ListView缓存机制](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/RecyclerView.md)
