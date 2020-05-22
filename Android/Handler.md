@@ -1,6 +1,6 @@
-### Android中的消息机制
+## Handler的原理
 
-#### 1.处理消息的手段——Handler、Looper与Message
+### 1.处理消息的手段——Handler、Looper与Message
 
 ​		我们知道Android应用在启动时，会默认有一个主线程(UI线程)，在这个线程中会关联一个消息队列，所有的操作都会被封装成消息然后交给主线程来处理。为了保证主线程不会主动退出，会将获取消息的操作放在一个死循环中，这样程序就相当于一直在执行死循环，因此不会退出。
 
@@ -203,9 +203,195 @@ public final boolean sendMessage(Message msg) {
 }
 ```
 
-​		不管时post一个Runnable还是send一个Message，都会调用sendMessageAtTime(msg, time)方法。Handler最终将消息追加到MessageQueue中，而Looper不断地从MessageQueue中读取消息，并且调用Handler的dispatchMessage方法，这样消息就能源源不断地被产生、添加到MessageQueue、被Handler处理。
+​		不管是post一个Runnable还是send一个Message，都会调用sendMessageAtTime(msg, time)方法。Handler最终将消息追加到MessageQueue中，而Looper不断地从MessageQueue中读取消息，并且调用Handler的dispatchMessage方法，这样消息就能源源不断地被产生、添加到MessageQueue、被Handler处理。
 
-#### 2.在子线程中创建Handler为何会抛出异常
+### 2. MessageQueue如何处理消息
+
+我们添加消息，最终会调用到MessageQueue的enqueueMessage方法：
+
+```java
+boolean enqueueMessage(Message msg, long when) {
+    ...
+    synchronized (this) {
+        Message p = mMessages;
+        boolean needWake;
+        if (p == null || when == 0 || when < p.when) {
+            msg.next = p;
+            mMessages = msg;
+            needWake = mBlocked;
+        } else {
+            // 插入到queue
+        }
+        if (needWake) { nativeWake(mPtr); }
+    }
+    return true;
+}
+```
+
+上述代码可以看出，入队的Message，如果满足条件，则立即执行，如果不满足，则加入队列中。
+
+处理消息则是调用MessageQueue的next方法取出消息进行处理：
+
+```java
+Message next() {
+    ...
+    for (;;) {
+        ...
+        nativePollOnce(ptr, nextPollTimeoutMillis); // 1
+        synchronized (this) {
+            Message msg = mMessages;
+            if (msg != null) { 
+                if (now < msg.when) {
+                    nextPollTimeoutMillis = (int) Math.min(msg.when - now, 
+                            Integer.MAX_VALUE); // 2
+                } else {
+                    ...
+                    return msg;
+                }
+            } else {
+                nextPollTimeoutMillis = -1; // 3
+            }
+    ...
+}
+```
+
+上述代码可以看出，next也是通过死循环去取消息，
+
+* 先看注释2处，如果msg不为null，并且还不到执行的时间，则设置nextPollTimeoutMillis的值；
+* 如果msg不为null，并且达到了执行的条件，则直接返回msg去执行；
+* 如果msg为null，则将nextPollTimeoutMillis置为-1；
+
+接着我们看nativePoolOnce，会调用底层的NativeMessageQueue，假设该方法中发现nextPollTimeoutMillis值为5000，则阻塞5000ms后自动返回，如果发现nextPollTimeoutMillis值为-1，说明没有消息需要处理，则会一直阻塞，那什么时候唤醒呢？是在MessageQueue的enqueueMessage方法中，最后会判断，如果neekWake为true，就会调用底层的nativeWake方法，就会唤醒阻塞，也就是nativePoolOnce不再阻塞，返回后继续往下执行代码。底层采用的是epoll机制，用来监控描述符，如果描述符就绪，则会通知相应的程序进行读写。
+
+### 3. 消息空闲IdleHandler
+
+IdleHanlder是MessageQueue的内部类
+
+```java
+/**
+ * Callback interface for discovering when a thread is going to block
+ * waiting for more messages.
+ */
+public static interface IdleHandler {
+    /**
+     * Called when the message queue has run out of messages and will now
+     * wait for more.  Return true to keep your idle handler active, false
+     * to have it removed.  This may be called if there are still messages
+     * pending in the queue, but they are all scheduled to be dispatched
+     * after the current time.
+     */
+    boolean queueIdle();
+}
+```
+
+使用方式入如下：
+
+```java
+MessageQueue.IdleHandler idleHandler = new MessageQueue.IdleHandler() {
+        @Override
+        public boolean queueIdle() {
+            ...
+            return false; 
+        }
+    };
+Looper.myQueue().addIdleHandler(idleHandler);
+```
+
+在IdleHanlder的queueIdle()方法中，返回false表示一次性消费，执行完就移除掉；返回true表示这次执行完，下一次还会执行。
+
+我们来看IdleHanlder的相关方法和内容：
+
+```java
+public final class MessageQueue {
+    ...
+    private final ArrayList<IdleHandler> mIdleHandlers = new ArrayList<IdleHandler>();
+    private IdleHandler[] mPendingIdleHandlers;
+
+    public void addIdleHandler(@NonNull IdleHandler handler) {
+        if (handler == null) {
+            throw new NullPointerException("Can't add a null IdleHandler");
+        }
+        synchronized (this) {
+            mIdleHandlers.add(handler);
+        }
+    }
+
+    public void removeIdleHandler(@NonNull IdleHandler handler) {
+        synchronized (this) {
+            mIdleHandlers.remove(handler);
+        }
+    }
+```
+
+具体的调用还是在MessageQueue的next方法中：
+
+```java
+Message next() {
+    ...
+    for (;;) {
+        ...
+        nativePollOnce(ptr, nextPollTimeoutMillis); // 1
+        synchronized (this) {
+            Message msg = mMessages;
+            if (msg != null) { 
+                if (now < msg.when) {
+                    nextPollTimeoutMillis = (int) Math.min(msg.when - now, 
+                            Integer.MAX_VALUE); // 2
+                } else {
+                    ...
+                    return msg;
+                }
+            } else {
+                nextPollTimeoutMillis = -1; // 3
+            }
+            // 队列空闲时，执行idle队列
+            if (pendingIdleHandlerCount < 0&& (mMessages == null || now < mMessages.when)) {
+                pendingIdleHandlerCount = mIdleHandlers.size();
+            }
+            if (pendingIdleHandlerCount <= 0) {
+                mBlocked = true;
+                continue; // 空闲队列为null，则继续执行for循环
+            }
+            if (mPendingIdleHandlers == null) {
+               mPendingIdleHandlers = new IdleHandler[Math.max(pendingIdleHandlerCount, 4)];
+            }
+            mPendingIdleHandlers = mIdleHandlers.toArray(mPendingIdleHandlers);
+        } 
+        // 运行空闲队列
+        for (int i = 0; i < pendingIdleHandlerCount; i++) {
+            final IdleHandler idler = mPendingIdleHandlers[i];
+            mPendingIdleHandlers[i] = null; // release the reference to the handler
+            boolean keep = false;
+            try {
+                keep = idler.queueIdle(); // 4
+            } catch (Throwable t) {
+                Log.wtf(TAG, "IdleHandler threw exception", t);
+            }
+            if (!keep) {  // 5
+                synchronized (this) {
+                    mIdleHandlers.remove(idler); // 6
+                }
+            }
+        }
+        // 将空闲队列计数置为0，这样就不用再运行它们了。
+        pendingIdleHandlerCount = 0;
+        // 调用空闲队列时，可能已经传递了一个新消息，所以返回重新执行一遍for循环
+        nextPollTimeoutMillis = 0;
+    } 
+}
+```
+
+我们来总结一下空闲队列的处理过程：
+
+* 如果next方法查询到msg，则会直接return，去执行消息；
+* 如果当前队列为null，或者有消息还没到执行的时间，就会继续往下执行，运行到idle相关代码；
+* 判断存放idle的集合大小是否为0，如果是则continue继续执行for循环；
+* 如果idle集合不为null，则idle集合转换成数组去遍历执行；
+* 每执行一个idleHandler任务，都会对queueIdle的返回值进行判断，如果是false，就将此IdleHandler任务从idle集合中移除；
+* 遍历执行完成后，将idle队列计数置为0 ，这样就不用在运行它们了；
+* 还要将nextPollTimeoutMillis置为0，因为执行空闲队列期间，可能有新的的Message创建，所以重新执行for循环去检查新消息。
+
+### 4. 在子线程中创建Handler为何会抛出异常
 
 ​		首先看代码：
 
