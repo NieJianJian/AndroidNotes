@@ -144,12 +144,27 @@ protected ViewGroup generateLayout(DecorView decor) {
     } else {
         layoutResource = R.layout.screen_simple;
     }
+    mDecor.startChanging();
+    mDecor.onResourcesLoaded(mLayoutInflater, layoutResource); // 2
+    ViewGroup contentParent = (ViewGroup)findViewById(ID_ANDROID_CONTENT); // 3
+    if (contentParent == null) {
+        throw new RuntimeException("Window couldn't find content container view");
+    }
     ...
     return contentParent;
 }
 ```
 
-该方法的主要作用是根据不同的情况加载不同的布局赋值给layoutResource。现在主要来看注释1处的布局文件R.layout.scrren_title，这个文件在frameworks，代码如下：
+该方法的主要作用是根据不同的情况加载不同的布局赋值给layoutResource。然后注释2处调用DecorView的onResourceLoaded方法，该方法内部会调用LayoutInflater.inflate方法，根据传进去的layoutResource生成相应的View；在上述注释3处，会调用findViewById方法，生成contentParent并返回，从而完成了installDecor方法中的mContentParent变量的赋值，我们来看ID_ANDROID_CONTENT是什么：
+
+```java
+/**
+ * The ID that the main layout in the XML layout file should have.
+ */
+public static final int ID_ANDROID_CONTENT = com.android.internal.R.id.content;
+```
+
+ID_ANDROID_CONTENT是一个id为content的值，现在主要来看注释1处的布局文件R.layout.scrren_title，这个文件在frameworks，代码如下：
 
 ```xml
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
