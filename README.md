@@ -7,7 +7,7 @@
  * [View体系](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View.md)
  * [View事件分发和拦截](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View/ViewDispatchEvent.md)
  * [Android动画](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Animation.md)
- * [Android多线程实现方式](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/AndroidMultiThread.md)
+ * [Android多线程实现方式——AsyncTask、HandlerThread、IntentService](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/AndroidMultiThread.md)
  * [RecyclerView和ListView缓存机制](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/RecyclerView.md)
 
 ## Java基础
@@ -37,7 +37,8 @@
 * [AIDL](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/AIDL.md)
 * [注解处理器](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/AnnotationProcessor.md)
 * [OkHttp源码解析](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/OkHttp.md)
-* [Retrofit源码解析]()
+* [Retrofit源码解析](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/Retrofit.md)
+* [ButterKnife源码分析](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/ButterKnife.md)
 * [Android性能优化](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/PerformanceOptimization.md)
 * [Android内存泄露](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/MemoryLeak.md)
 
