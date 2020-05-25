@@ -28,7 +28,7 @@
 * [Java反射](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/Java反射.md)
 * [代理模式](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/代理模式.md)
 * [Java注解](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/java注解.md)
-* [Java内部类](https://github.com/NieJianJian/AndroidNotes/blob/master/InnerClass.md)
+* [Java内部类](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/InnerClass.md)
 
 ## Android进阶
 
@@ -36,11 +36,11 @@
 * [IPC机制](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/IPC.md)
 * [AIDL](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/AIDL.md)
 * [注解处理器](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/AnnotationProcessor.md)
+* [Android性能优化](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/PerformanceOptimization.md)
+* [Android内存泄露](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/MemoryLeak.md)
 * [源码分析之——OkHttp](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/OkHttp.md)
 * [源码分析之——Retrofit](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/Retrofit.md)
 * [源码分析之——ButterKnife](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/ButterKnife.md)
-* [Android性能优化](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/PerformanceOptimization.md)
-* [Android内存泄露](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/MemoryLeak.md)
 
 ## Android架构
 

@@ -37,6 +37,12 @@ public boolean dispatchTouchEvent(MotionEvent ev) {
 
 Window类可以控制顶级View的外观和行为策略，它的唯一实现是PhoneWindow。PhoneWindow将事件直接传递给了根View——DecorView。
 
+```java
+public boolean superDispatchTouchEvent(MotionEvent event) {
+    return mDecor.superDispatchTouchEvent(event);
+}
+```
+
 ### 2. ViewGroup对点击事件的分发过程
 
 ```java

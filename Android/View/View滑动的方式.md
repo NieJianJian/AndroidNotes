@@ -6,7 +6,7 @@
 
 ### 1. layout()方法
 
-### 2. offsetLayoutAndRight()和offsetTopAndBottom()
+### 2. offsetLeftAndRight()和offsetTopAndBottom()
 
 ### 3. LayoutParams（改变布局参数）
 
