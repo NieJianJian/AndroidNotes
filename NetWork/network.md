@@ -13,6 +13,7 @@
   * [3.4 HTTP消息报头](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#34-http消息报头)
   * [3.5 HTTP请求方式](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#35-http请求方式)
   * [3.6 HTTP拓展知识](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#36-http拓展知识)
+  * [3.7 HTTP断点续传原理](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#37-http断点续传原理)
 * [4. HttpClient和HttpURLConnection](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#4-httpclient和httpurlconnection)
   * [HttpClient](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#41-httpclient)
   * [HttpURLConnection](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#42-httpurlconnection)
@@ -489,6 +490,12 @@ HTTP响应报文由状态行、响应包头、空行、响应正文4个部分组
     * 浏览器将密钥C，发送给服务器；
     * 服务器用私钥D对接受的密钥C进行解密，得到对称加密钥B；
     * 浏览器和服务器之间可以用密钥B作为对称加密密钥进行通信。
+
+***
+
+#### 3.7 HTTP断点续传原理
+
+
 
 ***
 

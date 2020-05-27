@@ -1,6 +1,4 @@
-## Java 并发基础知识
-
-### 1. Java并发三大特性
+## Java并发三大特性
 
 * **原子性**
 
@@ -111,4 +109,9 @@
 
       一个变量在同一个时刻只允许一条线程对其进行lock操作。
 
-    * 通过Lock接口来保证有序性
+    * 通过Lock接口来保证有序
+
+***
+
+* [对于volatile型变量的特殊规则](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book1/Volatile.md)
+

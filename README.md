@@ -9,6 +9,7 @@
  * [Android动画](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Animation.md)
  * [Android多线程实现方式——AsyncTask、HandlerThread、IntentService](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/AndroidMultiThread.md)
  * [RecyclerView和ListView缓存机制](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/RecyclerView.md)
+ * [Activity的启动模式以及任务栈](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/StartMode_Task.md)
 
 ## Java基础
 

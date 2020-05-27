@@ -103,8 +103,8 @@ private static final Singleton<IActivityManager> IActivityManagerSingleton =
         new Singleton<IActivityManager>() {
             @Override
             protected IActivityManager create() {
-                final IBinder b = ServiceManager.getService(Context.ACTIVITY_SERVICE);
-                final IActivityManager am = IActivityManager.Stub.asInterface(b);
+                final IBinder b = ServiceManager.getService(Context.ACTIVITY_SERVICE); // 1
+                final IActivityManager am = IActivityManager.Stub.asInterface(b); // 2
                 return am;
             }
         };
@@ -371,7 +371,7 @@ FLAG也可以设定Activity的启动方式。并且优先级满足`FALG > Launch
 
 **作用**：用来指定Activity希望归属的栈。默认情况下，同一个应用程序所有的Activity都有着相同的`taskAffinity`。
 
-`taskAffinity`在下面两种情况时回产生效果。
+`taskAffinity`在下面两种情况时会产生效果。
 
-* (1) `taskAffinity`与`FLAG_ACTIVITY_NEW_TASK`或者`singleTask`配合。如果新启动Activity的`taskAffinity`和栈`taskAffinity`相同则加入到该栈中；如果不同，就回创建新栈。
+* (1) `taskAffinity`与`FLAG_ACTIVITY_NEW_TASK`或者`singleTask`配合。如果新启动Activity的`taskAffinity`和栈`taskAffinity`相同则加入到该栈中；如果不同，就会创建新栈。
 * (2) `taskAffinity`与`allowTaskReparenting`配合。如果`allowTaskReparenting`为true，说明Activity具有转移的能力。拿之前的发邮件为例，当社交应用启动了发送邮件的Activity，此时发送邮件的Activity是和社交应用处于同一个栈中的，并且这个栈位于前台。如果发送邮件的Activity的`allowTaskReparenting`设置为true，此后Email应用所在的栈位于前台时，发送邮件的Activity就会由社交应用的栈中转移到与它更亲近的邮件应用（taskAffinity相同）所在的栈中。
