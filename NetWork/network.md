@@ -12,8 +12,9 @@
   * [3.3 HTTP响应报文](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#33-http响应报文)
   * [3.4 HTTP消息报头](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#34-http消息报头)
   * [3.5 HTTP请求方式](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#35-http请求方式)
-  * [3.6 HTTP拓展知识](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#36-http拓展知识)
-  * [3.7 HTTP断点续传原理](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#37-http断点续传原理)
+  * [3.6 HTTPS简介](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#36-https简介)
+  * [3.7 HTTP拓展知识](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#37-http拓展知识)
+  * [3.8 HTTP断点续传原理](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#38-http断点续传原理)
 * [4. HttpClient和HttpURLConnection](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#4-httpclient和httpurlconnection)
   * [HttpClient](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#41-httpclient)
   * [HttpURLConnection](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#42-httpurlconnection)
@@ -322,6 +323,8 @@ HTTP响应报文由状态行、响应包头、空行、响应正文4个部分组
   常见状态码、状态描述如下：
 
   * 200 OK：客户端请求成功。
+  * 301 Moved Permanently ：永久重定向。请求的资源已经分配新的URI。
+  * 302 Move Temporarily：暂时重定向。旧的地址还在，这次只是暂时跳转到新的URIL。
   * 400 Bad Request：客户端请求有语法错误，服务器无法理解。
   * 401 Unauthorized：请求未经授权，这个状态码必须和WWW-Authenticate报头域一起使用。
   * 403 Forbidden：服务器收到请求，但是拒绝提供服务。
@@ -410,11 +413,7 @@ HTTP响应报文由状态行、响应包头、空行、响应正文4个部分组
 
 ***
 
-#### 3.6 HTTP拓展知识
-
-* **SSL**
-
-  Secure Sockets Layer ，是安全套接字协议。为了解决HTTP明文传输的不安全性（虽然POST提交的数据在报体中看不到，但是可以通过抓包工具窃取到）。SSL是基于HTTP之下TCP之上的一个协议层（也就是传输层和应用层之间），是基于HTTP标准并对TCP传输数据时进行加密。
+#### 3.6 HTTPS介绍
 
 * **HTTPS**
 
@@ -422,17 +421,98 @@ HTTP响应报文由状态行、响应包头、空行、响应正文4个部分组
 
   HTTPS = HTTP + SSL。
 
-* **TLS**
+  > **SSL**：Secure Sockets Layer ，是安全套接字协议。为了解决HTTP明文传输的不安全性（虽然POST提交的数据在报体中看不到，但是可以通过抓包工具窃取到）。SSL是基于HTTP之下TCP之上的一个协议层（也就是传输层和应用层之间），是基于HTTP标准并对TCP传输数据时进行加密。
 
-  Transport Layer Security，是传输层安全协议。SSL协议是TLS协议的前身。
+  > **TLS**：Transport Layer Security，是传输层安全协议。SSL协议是TLS协议的前身。
 
-* **SOCKS**
+* **HTTP和HTTPS的区别**
+
+  * HTTP明文传输，不安全；HTTPS加密协议，是安全的。
+  * HTTP不需要证书，HTTPS需要CA证书。
+  * HTTP标准端口是80，HTTPS标准端口是443。
+
+* **HTTPS加密过程**
+
+  **HTTPS加密采用的是对称加密和非对称加密结合的方式**。
+
+  > 加密方式：
+  >
+  > * 对称加密：加密解密都是同一把密钥。
+  > * 非对称加密：密钥成对出现，分为公钥和私钥，传输双方均有一对自己的密钥，公钥加密通过私钥进行解密。传输双方都将自己的公钥发给对方，对方用公钥进行加密，自己用私钥进行解密。
+
+  > 加密方式区别
+  >
+  > * 对称加密算法简单，加密速度快，非对称加密算法复杂，加密速度慢。
+  > * 对称加密要将密钥暴露，和明文传输没区别。
+  > * 非对称加密算法复杂，耗时是对称加密的数千倍。
+
+  HTTPS加密过程
+
+  * 浏览器使用HTTPS的URL访问服务器，建立SSL链接；
+  * 服务器收到SSL链接，发送非对称加密的公钥A返回给浏览器；
+  * 浏览器随机生成对称加密的密钥B；
+  * 浏览器使用公钥A，对自己生成的密钥B进行加密，得到密钥C；
+  * 浏览器将密钥C，发送给服务器；
+  * 服务器用私钥D对接受的密钥C进行解密，得到对称加密钥B；
+  * 浏览器和服务器之间可以用密钥B作为对称加密密钥进行通信。
+
+* **HTTPS认证过程**
+
+  * SSL证书简介
+    * 域名分类：
+      * 单域名认证：如`www.baidu.com`或者`baidu.com`；
+      * 泛域名认证：也称为通配符证书，如`*.baidu.com`。
+    * 类型分为DV、OV、EV
+      * DV不包含企业信息，OV和EV包含企业信息；
+      * EV比OV采用了更加严格的认证标准。
+    * 作用：用来做认证和加密
+    * 标准：大多数证书基于X.509证书标准
+    * 颁发机构：CA认证机构
+    * 包括什么内容：
+      * 使用者公钥值
+      * 使用者标识信息（如名称和电子邮件地址）
+      * 证书的有效期时间
+      * 颁发者CA标识信息
+      * 颁发者CA的数字签名
+      * 常用名称：缩写CN
+      * 主题备用名称：缩写SAN（管理多个DNS名称，应包含CN）
+  * SSL证书创建过程：
+
+  
+
+  公钥加密，私钥解密。——用于加解密。加密，是不希望别人知道，只有我自己能解密，所以我自己用保存的私钥进行解密。<sup>[[12]](https://blog.csdn.net/qq_23167527/article/details/80614454)</sup>
+
+  私钥加密，公钥解密。——用于签名。签名，是不希望别人冒充我，所以私钥是我保存，用来签名，别人可以用我的公钥去解密然后证明我的签名的真伪。<sup>[[12]](https://blog.csdn.net/qq_23167527/article/details/80614454)</sup>
+
+  
+
+  
+
+  * 证书的申请需要提供什么？哪些是需要客户提供的？
+  * 证书的公钥是唯一的吗？能不能更换？
+  * 私钥泄露会怎么办？
+  * 客户端如何确认证书的合法性？
+  * 证书的校验过程？
+
+解决办法有两种，一个在你的代码里忽略掉证书合法性检查，接受任意的证书，这样的副作用是不太安全。二是在本地的Java根证书列表里面加入对方的CA证书，这样所有Java程序都能识别这个证书。三是在代码里加入对方的CA证书，这样只有你的应用能识别对方的证书。
+
+***
+
+#### 3.7 HTTP拓展知识
 
 * **DNS**
 
   域名系统（Domain Name System缩写DNS，Domain Name被译为域名）是因特网的一项核心服务，它作为可以将域名和IP地址相互映射的一个分布式数据库，能够使人更方便的访问互联网，而不用去记住能够被机器直接读取的IP数串。
 
   **作用**：用来解析域名。互联网中其实不存在www.xxx.com这样域名方式，而是255.255.255.255这样的IP地址，访问域名www.xxx.com，DNS服务器会将域名映射到对应的IP地址上，从而完成域名解析。（域名方便记忆）
+
+  * 域名层次
+    * 顶级域名（一级域名），每个域名都以顶级域名结尾。
+      * 通用顶级域，例如`.com`、`.net`和`.org`；
+      * 国家和地区顶级域，例如`.us`、`cn`和`.tk`。
+    * 二级域名，域名层次结构中，顶级域名下面是二级域名，它位于顶级域名的左侧。例如`www.baidu.com`中，`baidu`是二级域名。`w3.org`中，`w3`也是二级域名，与前面的`baidu`一个层面。
+    * 三级域名，它位于二级域名的左侧。例如`www.baidu.com`中，`www`是三级域名。
+    * 从右侧到左侧，隔一个点依次降低一层。
 
 * **DNS寻址过程**
 
@@ -451,6 +531,8 @@ HTTP响应报文由状态行、响应包头、空行、响应正文4个部分组
 
   客户端和服务器的"中间人"，进行接收和转发。
 
+* **SOCKS**
+
 * **网关**
 
   网关的工作机制和代理十分相似。而网关能使通信线路上的服务器提供非 HTTP 协议服务。
@@ -465,35 +547,9 @@ HTTP响应报文由状态行、响应包头、空行、响应正文4个部分组
 
   在相隔甚远的客户端和服务器之间进行中转，并保持双方通信连接的应用程序。隧道本身不去解析HTTP请求，请求保持原样中转给之后的服务器。
 
-* **HTTP和HTTPS的区别**
-
-  * HTTP明文传输，不安全；HTTPS加密协议，是安全的。
-  * HTTP不需要整数，HTTPS需要CA证书。
-  * HTTP标准端口是80，HTTPS标准端口是443。
-  
-* **HTTPS加密**
-
-  **HTTPS加密采用的是对称加密和非对称加密结合的方式**。
-
-  * 加密方式：
-    * 对称加密：加密解密都是同一把密钥。
-    * 非对称加密：密钥成对出现，分为公钥和私钥，传输双方均有一对自己的密钥，公钥加密通过私钥进行解密。传输双方都将自己的公钥发给对方，对方用公钥进行加密，自己用私钥进行解密。
-  * 加密方式区别
-    * 对称加密算法简单，加密速度快，非对称加密算法复杂，加密速度慢。
-    * 对称加密要将密钥暴露，和明文传输没区别。
-    * 非对称加密算法复杂，耗时是对称加密的数千倍。
-  * HTTPS加密过程
-    * 浏览器使用HTTPS的URL访问服务器，建立SSL链接；
-    * 服务器收到SSL链接，发送非对称加密的公钥A返回给浏览器；
-    * 浏览器随机生成对称加密的密钥B；
-    * 浏览器使用公钥A，对自己生成的密钥B进行加密，得到密钥C；
-    * 浏览器将密钥C，发送给服务器；
-    * 服务器用私钥D对接受的密钥C进行解密，得到对称加密钥B；
-    * 浏览器和服务器之间可以用密钥B作为对称加密密钥进行通信。
-
 ***
 
-#### 3.7 HTTP断点续传原理
+#### 3.8 HTTP断点续传原理
 
 
 
@@ -642,15 +698,16 @@ public static void postParams(OutputStream output, List<NameValuePair> list)
 
 ### 参考链接
 
-[TCP报文格式详解](https://blog.csdn.net/paincupid/article/details/79726795)
-
-[TCP 为什么是三次握手，而不是两次或四次](https://www.zhihu.com/question/24853633)
-
-[一文搞懂TCP和UDP](https://www.cnblogs.com/fundebug/p/differences-of-tcp-and-udp.html)
-
-[代理，网关，隧道，有什么区别与联系](https://www.idcbest.com/idcnews/11003815.html)
-
-[代理，网关，隧道，有什么区别与联系？](https://www.zhihu.com/question/268204483)
-
-[什么是HTTP隧道，怎么理解HTTP隧道呢？](https://www.zhihu.com/question/21955083)
+1. [TCP报文格式详解](https://blog.csdn.net/paincupid/article/details/79726795)
+2. [TCP 为什么是三次握手，而不是两次或四次](https://www.zhihu.com/question/24853633)
+3. [一文搞懂TCP和UDP](https://www.cnblogs.com/fundebug/p/differences-of-tcp-and-udp.html)
+4. [代理，网关，隧道，有什么区别与联系](https://www.idcbest.com/idcnews/11003815.html)
+5. [代理，网关，隧道，有什么区别与联系？](https://www.zhihu.com/question/268204483)
+6. [什么是HTTP隧道，怎么理解HTTP隧道呢？](https://www.zhihu.com/question/21955083)
+7. [HTTPS那些事之HTTPS原理](https://zhuanlan.zhihu.com/p/30926917)
+8. [HTTPS那些事之SSL证书](https://zhuanlan.zhihu.com/p/30980579)
+9. [https 客户端（即浏览器）是如何校验公钥证书合法性的?](https://www.v2ex.com/amp/t/411144)
+10. [想不通HTTPS如何校验证书合法性来看](https://blog.csdn.net/love_hot_girl/article/details/81164279)
+11. [什么是安全证书，访问者到底是怎么校验安全证书的，服务端返回安全证书后，客户端再向谁验证呢？](https://www.cnblogs.com/changbaishan/p/7676615.html)
+12. [非对称加解密，私钥和公钥到底是谁来加密，谁来解密](https://blog.csdn.net/qq_23167527/article/details/80614454)
 
