@@ -573,6 +573,7 @@ public boolean quitSafely() {
 * 由于IntentService是服务的原因，它的优先级比线程高，所以适合执行一些高优先级的后台任务。
 * IntentService封装了HandlerThread和Handler。
 * 省去了Service创建线程的那些麻烦。
+* 注意：IntentService的onHandlerIntent方法是在子线程中回调，更新UI需要去主线程处理。
 
 #### 使用场景
 

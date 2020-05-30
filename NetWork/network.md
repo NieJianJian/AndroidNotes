@@ -413,7 +413,7 @@ HTTP响应报文由状态行、响应包头、空行、响应正文4个部分组
 
 ***
 
-#### 3.6 HTTPS介绍
+#### 3.6 HTTPS简介
 
 * **HTTPS**
 
@@ -459,6 +459,7 @@ HTTP响应报文由状态行、响应包头、空行、响应正文4个部分组
 * **HTTPS认证过程**
 
   * SSL证书简介
+
     * 域名分类：
       * 单域名认证：如`www.baidu.com`或者`baidu.com`；
       * 泛域名认证：也称为通配符证书，如`*.baidu.com`。
@@ -476,25 +477,76 @@ HTTP响应报文由状态行、响应包头、空行、响应正文4个部分组
       * 颁发者CA的数字签名
       * 常用名称：缩写CN
       * 主题备用名称：缩写SAN（管理多个DNS名称，应包含CN）
+
   * SSL证书创建过程：
 
-  
+    > 公钥加密，私钥解密。——用于加解密。加密，是不希望别人知道，只有我自己能解密，所以我自己用保存的私钥进行解密。<sup>[[12]](https://blog.csdn.net/qq_23167527/article/details/80614454)</sup>
 
-  公钥加密，私钥解密。——用于加解密。加密，是不希望别人知道，只有我自己能解密，所以我自己用保存的私钥进行解密。<sup>[[12]](https://blog.csdn.net/qq_23167527/article/details/80614454)</sup>
+    > 私钥加密，公钥解密。——用于签名。签名，是不希望别人冒充我，所以私钥是我保存，用来签名，别人可以用我的公钥去解密然后证明我的签名的真伪。<sup>[[12]](https://blog.csdn.net/qq_23167527/article/details/80614454)</sup>
 
-  私钥加密，公钥解密。——用于签名。签名，是不希望别人冒充我，所以私钥是我保存，用来签名，别人可以用我的公钥去解密然后证明我的签名的真伪。<sup>[[12]](https://blog.csdn.net/qq_23167527/article/details/80614454)</sup>
+    有效的证书是由权威CA机构发布，证书中心用自己的私钥，对使用者的公钥和一些相关信息进行加密，生成"数字证书"。这个权威机构CA客户端是可以完全信任的，客户端浏览器会安装CA的根证书，由CA签名的证书是被CA所信任的，这就构成了信任链，所以客户端可以信任该服务器的证书。<sup>[[11]](https://www.cnblogs.com/changbaishan/p/7676615.html)</sup>
 
-  
+  * SSL协议握手过程<sup>[[13](http://www.ruanyifeng.com/blog/2014/09/illustration-ssl.html)]</sup>
 
-  
+    开始加密通信之前，客户端和服务器首先必须建立连接和交换参数，这个过程叫做握手（handshake）。
 
-  * 证书的申请需要提供什么？哪些是需要客户提供的？
-  * 证书的公钥是唯一的吗？能不能更换？
-  * 私钥泄露会怎么办？
-  * 客户端如何确认证书的合法性？
-  * 证书的校验过程？
+    假定客户端叫做爱丽丝，服务器叫做鲍勃，握手阶段分为5步：
 
-解决办法有两种，一个在你的代码里忽略掉证书合法性检查，接受任意的证书，这样的副作用是不太安全。二是在本地的Java根证书列表里面加入对方的CA证书，这样所有Java程序都能识别这个证书。三是在代码里加入对方的CA证书，这样只有你的应用能识别对方的证书。
+    1. 爱丽丝给出协议版本号、一个客户端生成的随机数（Client random），以及客户端支持的加密方法。
+
+    2. 鲍勃确认双方使用的加密方法，并给出数字证书、以及一个服务器生成的随机数（Server random）。
+
+    3. 爱丽丝确认数字证书有效，然后生成一个新的随机数（Premaster secret），并使用数字证书中的公钥，加密这个随机数，发给鲍勃。
+
+    4. 鲍勃使用自己的私钥，获取爱丽丝发来的随机数（即Premaster secret）。
+
+    5. 爱丽丝和鲍勃根据约定的加密方法，使用前面的三个随机数，生成"对话密钥"（session key），用来加密接下来的整个对话过程。
+
+    握手阶段有3点需要注意：
+
+    * 生成对话密钥一共需要3个随机数。
+    * 握手之后的对话使用"对话密钥"加密（对称加密），服务器的公钥和私钥只用于加密和解密"对话密钥"（非对称加密），无其他作用。
+    * 服务器的公钥放在服务器的数字证书之中。
+
+  * 如何确认SSL证书的合法性？（SSL协议握手过程的第3步）
+
+    客户端与服务器建立ssl连接时，服务器将自身的证书传输给客户端，客户端在验证证书的时候，先看CA的根证书是否在自己的信任根证书列表中。再用CA的根证书提供的公钥来验证服务器证书中的数字签名，如果公钥可以解开签名，证明该证书确实被CA所信任。再看证书是否过期，访问的网站域名与证书绑定的域名是否一致。这些都通过，说明证书可以信任。<sup>[[11]](https://www.cnblogs.com/changbaishan/p/7676615.html)</sup>
+
+  * MITM（中间人攻击）
+
+    * SSL劫持攻击<sup>[[15](https://blog.csdn.net/silk_bar/article/details/51040172)]</sup>
+
+      SSL劫持攻击也就是TLS/SSL证书欺骗攻击，攻击者需要先将自己接入到浏览器与目标网站之间，在传输过程中，用自己的证书替换掉服务端发给浏览器的证书，这样的话攻击者对于浏览器返回的数据就能根据自己的证书的私钥进行解密以获取明文的数据，不过这种方式有个很明显的漏洞，就是替换掉证书后，浏览器方对于证书验证会不通过，会提示用户，此时只要用户选择不继续浏览攻击者就不能成功获取到用户数据了。**一旦用户选择了信任证书，那么SSL劫持就成功了。所以不要轻易信任所有证书**。<sup>[[15](https://blog.csdn.net/silk_bar/article/details/51040172)]</sup>
+
+      > 浏览器校验证书失败的原因：SSL证书是不是由受信任的CA机构颁发的；证书是否过期；访问网站域名和证书的SAN是否一致。即使攻击者得到了CA机构颁发的证书，满足了1、2点，也无法满足第3点，所以证书的验证肯定是失败的。<sup>[[15](https://blog.csdn.net/silk_bar/article/details/51040172)]</sup>
+
+      * 避免措施
+        * 浏览器不要轻易信任证书
+        * 针对安全性要求一般的app，可采用通过校验域名，证书有效性、证书关键信息及证书链的方式。以volley为例，重写HTTPSTrustManager 中的checkServerTrusted 方法，同时开启域名强校验。<sup>[[19](https://www.jianshu.com/p/a749881ba6cd)]</sup>
+        * 针对安全性要求比较高的 app，可采取客户端预埋证书的方式锁死证书，只有当客户端证书和服务端的证书完全一致的情况下才允许通信，如一些银行类的app，但这种方式面临一个问题，证书过期的问题，因证书有一定的有效期，当预埋证书过期了，只有通过强制更新或者要求用户下载证书来解决。<sup>[[19](https://www.jianshu.com/p/a749881ba6cd)]</sup>
+        * 如果是使用WebView浏览网页，需要在WebView中加入较强的授权校验，禁止用户在校验失败的情况下继续访问。<sup>[[16)](https://www.jianshu.com/p/a825de42ccbc)]</sup>
+
+    * SSL Strip（剥离）攻击<sup>[[17](https://www.cnblogs.com/LittleHann/p/3735602.html)]</sup>
+
+      即将HTTPS连接降级到HTTP连接。大部分使用SSL的网站并非"全站加密"，仅对部分重要的网页使用SSL，这就给攻击者以可乘之机。但是当用户访问的页面是涉及机密信息的登录页面时，服务端往往会采用"重定向"的方式，"强制"用户的浏览器以HTTPS的方式来访问登录页面，为的是保证密钥信息的安全传输。
+
+      1. SSLStrip会持续监听80端口的WEB数据，如果不是"重定向数据包"，则进行正常转发
+
+      2. 如果监听到"重定向数据包"，则拦截数据，开始建立双向连接
+         * 和目标客户端建立HTTP普通连接
+         * 和原始请求服务端建立HTTPS机密连接
+
+         * 并将原始服务端返回的HTTPS加密数据解密后，以HTTP方式返回给客户端 
+
+      因为此时目标客户端和攻击者中间人的网络通信都是HTTP的，所以，可以通过明文嗅探的方式直接得到密钥信息。
+
+      * 避免措施：
+
+        该种攻击方式同样无法劫持App内的HTTPS连接会话，因为App中传入请求的URL参数是固定带有“https://” 的；但在WebView中打开网页同样需要注意，在非全网HTTPS的网站，建议对WebView中打开的URL做检查，检查应该使用 “https://” 的URL是否被篡改为 “http://” ；也建议服务端在配置HTTPS服务时，加上“HTTP Strict Transport Security”配置项。<sup>[[16)](https://www.jianshu.com/p/a825de42ccbc)]</sup>
+
+* Android使用HTTPS
+
+  [Android Developers——通过 HTTPS 和 SSL 确保安全（无需翻墙）](https://developer.android.google.cn/training/articles/security-ssl)
 
 ***
 
@@ -549,9 +601,22 @@ HTTP响应报文由状态行、响应包头、空行、响应正文4个部分组
 
 ***
 
-#### 3.8 HTTP断点续传原理
+#### 3.8 HTTP断点下载原理
 
+使用RandomAccessFile的seek方法将指针移动到任意位置来读写：
 
+```
+RandomAccessFile raf = new RandomAccessFile(new File(filePath));
+raf.seek(downloadSie);
+```
+
+然后通过设置header，从服务器读取部分资源：
+
+```java
+addHeader("Range", "bytes=" + downloadSize + "-" + totalSize)
+```
+
+然后从指定位置开始写入文件
 
 ***
 
@@ -699,15 +764,48 @@ public static void postParams(OutputStream output, List<NameValuePair> list)
 ### 参考链接
 
 1. [TCP报文格式详解](https://blog.csdn.net/paincupid/article/details/79726795)
+
 2. [TCP 为什么是三次握手，而不是两次或四次](https://www.zhihu.com/question/24853633)
+
 3. [一文搞懂TCP和UDP](https://www.cnblogs.com/fundebug/p/differences-of-tcp-and-udp.html)
+
 4. [代理，网关，隧道，有什么区别与联系](https://www.idcbest.com/idcnews/11003815.html)
+
 5. [代理，网关，隧道，有什么区别与联系？](https://www.zhihu.com/question/268204483)
+
 6. [什么是HTTP隧道，怎么理解HTTP隧道呢？](https://www.zhihu.com/question/21955083)
+
 7. [HTTPS那些事之HTTPS原理](https://zhuanlan.zhihu.com/p/30926917)
+
 8. [HTTPS那些事之SSL证书](https://zhuanlan.zhihu.com/p/30980579)
+
 9. [https 客户端（即浏览器）是如何校验公钥证书合法性的?](https://www.v2ex.com/amp/t/411144)
+
 10. [想不通HTTPS如何校验证书合法性来看](https://blog.csdn.net/love_hot_girl/article/details/81164279)
+
 11. [什么是安全证书，访问者到底是怎么校验安全证书的，服务端返回安全证书后，客户端再向谁验证呢？](https://www.cnblogs.com/changbaishan/p/7676615.html)
+
 12. [非对称加解密，私钥和公钥到底是谁来加密，谁来解密](https://blog.csdn.net/qq_23167527/article/details/80614454)
+
+13. [图解SSL/TLS协议](http://www.ruanyifeng.com/blog/2014/09/illustration-ssl.html)
+
+14. [数字签名是什么？](http://www.ruanyifeng.com/blog/2011/08/what_is_a_digital_signature.html)
+
+15. [Https加密及攻防](https://blog.csdn.net/silk_bar/article/details/51040172)
+
+16. [MITM攻击(中间人攻击)](https://www.jianshu.com/p/a825de42ccbc)
+
+17. [中间人攻击(MITM)姿势总结](https://www.cnblogs.com/LittleHann/p/3735602.html)
+
+18. [HTTPS（含SNI）业务场景“IP直连”方案说明](https://help.aliyun.com/document_detail/30143.html)
+
+19. [HTTPS连接过程以及Android开发防止中间人攻击劫持](https://www.jianshu.com/p/a749881ba6cd)
+
+20. [Android Developers——通过 HTTPS 和 SSL 确保安全](https://developer.android.com/training/articles/security-ssl#java)
+
+    [Android Developers——通过 HTTPS 和 SSL 确保安全（无需翻墙）](https://developer.android.google.cn/training/articles/security-ssl)
+
+21. [android https简介和证书认证](https://www.jianshu.com/p/ad450a10bd7c)
+
+22. [Android使用https](jianshu.com/p/3beebdf846bb)
 
