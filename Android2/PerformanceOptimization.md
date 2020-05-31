@@ -6,7 +6,8 @@
 * Bitmap优化
 * ListView优化
 * 内存优化
-* APP启动白屏优化
+* APP启动优化——视觉优化（白屏优化）
+* APP启动优化——代码优化
 * 相关工具
 
 ***
@@ -89,7 +90,7 @@ Android应用采用沙箱机制，每个应用（进程）分配的内存大小�
 
 ***
 
-### APP启动白屏优化
+### APP启动优化——视觉优化（白屏优化）
 
 **Q**：为什么出现白屏（或黑屏）？
 
@@ -156,7 +157,96 @@ Android应用采用沙箱机制，每个应用（进程）分配的内存大小�
 
   将主题中的背景图片设置成和启动页一样的背景图，这样会加长背景图显示的时长，给人一种直接进入启动页的感觉。
 
-* [Android 性能优化(一) —— 启动优化提升60%](https://blog.csdn.net/qian520ao/article/details/81908505)
+***
+
+### APP启动优化——代码优化
+
+* Android冷启动耗时
+
+  首先我们需要统计冷启动所需要的时间。
+
+  使用adb命令`adb shell am start -S -W 包名/启动类的全限定名`。`-S`表示重启当前应用。
+
+  ```
+  mbp:~ nj$ adb shell am start -S -W com.nj.testappli/com.nj.testappli.MainActivity
+  Stopping: com.nj.testappli
+  Starting: Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.nj.testappli/.MainActivity }
+  Status: ok
+  Activity: com.nj.testappli/.MainActivity
+  ThisTime: 556
+  TotalTime: 556
+  WaitTime: 615
+  Complete
+  ```
+
+  `ThisTime`代表最后一个Activity的启动耗时；
+
+  `TotalTime`代表一连串的Activity的启动耗时（有几个Activity就统计几个）；
+
+  `ThisTime`和`TotalTime`一般情况下是相等的。只有在MainActivity的onCreate方法中，启动另外一个Activity，并且调用finish方法时，这两个值才会不相等。
+
+  `WaitTime`是`TotalTime`加上应用进程创建过程的耗时。
+
+  `ThisTime`和`TotalTime`的计算在`ActivityRecord.java`的`reportLaunchTimeLocked`方法中：
+
+  ```java
+  private void reportLaunchTimeLocked(final long curTime) {
+      ...
+      final long thisTime = curTime - displayStartTime;
+      final long totalTime = entry.mLaunchStartTime != 0
+              ? (curTime - entry.mLaunchStartTime) : thisTime;
+  ```
+
+  - `curTime`表示该函数调用的时间点.
+  - `displayStartTime`表示一连串启动Activity中的最后一个Activity的启动时间点.
+  - `mLaunchStartTime`表示一连串启动Activity中第一个Activity的启动时间点
+
+  * 系统日志统计
+
+  如果需要统计从桌面点击图标到Activity启动完毕，可以用`waitTime`，但是系统的启动时间优化不了，所以优化冷启动只需要处理`ThisTime`即可。
+
+* 代码优化
+
+  从Application的attachBaseContext方法、onCreate方法到Activity的onCreate、onStart以及onResume方法的耗时，都计算在了`ThisTime`中，也就是`TotalTime`中。
+
+  我们往往会在onCreate中执行很多初始化操作，比如繁琐的布局初始化、阻塞主线程的UI绘制操作、I/O读写或者网络读写以及其他一些占用主线程的操作。我们可以对初始化操作做一些分类：
+
+  1. 必要的组件一定要在主线程立即初始化，后续要用；
+
+  2. 组件一定要在主线程初始化，但是可以延迟；
+
+     可以使用`handler.postDelayed`来延迟触发初始化，也可以使用IdleHandler在主线程空闲的时候进行初始化。
+
+  3. 组件可以在子线程初始化。
+
+* 启动页优化
+
+  那些只能在主线程立即初始化的操作，我们可以将这些消耗的时间，在其他地方相抵消。
+
+  假设启动页设置为2000ms固定的展示时间，我们可以根据组件初始化的耗时对其进行调整，使其总的时间仍为2000ms。比如组件初始化时间为800ms，那么启动页只需要再展示1200ms即可。
+
+  Application初始化后会调用attachBaseContext方法，我们在该方法中记录下启动时间：
+
+  ```
+  @Override
+  protected void attachBaseContext(Context base) {
+      super.attachBaseContext(base);
+  		SPUtil.putLong("application_attach_time", System.currentTimeMillis());
+  }
+  ```
+
+  在Activity的onWindowFocusChanged方法的回调时机，就是View流程绘制完的时候，所以在这里记录下显示时间：
+
+  ```java
+  @Override
+  public void onWindowFocusChanged(boolean hasFocus) {
+      super.onWindowFocusChanged(hasFocus);
+      long appAttachTime = SPUtil.getLong("application_attach_time");
+      long diffTime = System.currentTimeMillis() - appAttachTime;
+  }
+  ```
+
+  所以最后启动页的显示时间为`2000ms - diffTime`的时间。
 
 ***
 
@@ -211,9 +301,9 @@ Android Lint 是 SDK Tools 16（ADT 16）开始引入的一个代码扫描工具
 您可以在 `lint.xml` 文件中指定 lint 检查偏好设置。如果您是手动创建此文件，请将其放置在 Android 项目的根目录下。`lint.xml` 文件由封闭的 `< lint>` 父标记组成，此标记包含一个或多个 `< issue>` 子元素。lint 会为每个 `<issue>` 定义唯一的 `id` 属性值。
 
 ```xml
-    <?xml version="1.0" encoding="UTF-8"?>
-        <lint>
-            <!-- list of issues to configure -->
+<?xml version="1.0" encoding="UTF-8"?>
+    <lint>
+        <!-- list of issues to configure -->
     </lint>
 ```
 
@@ -228,4 +318,5 @@ Android Lint 是 SDK Tools 16（ADT 16）开始引入的一个代码扫描工具
 * [Android - 启动白屏分析与优化](https://www.jianshu.com/p/cdbdfa5a5319?utm_campaign=haruki&utm_content=note&utm_medium=reader_share&utm_source=qq)
 * [Android APP应用启动页白屏(StartingWindow)优化](https://www.cnblogs.com/whycxb/p/9312914.html)
 * [Android 性能优化(一) —— 启动优化提升60%](https://blog.csdn.net/qian520ao/article/details/81908505)
+* [如何调试Android Framework？](http://weishu.me/2016/05/30/how-to-debug-android-framework/)
 

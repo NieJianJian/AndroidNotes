@@ -3,6 +3,7 @@
 ## Android基础
 
  * [Git命令](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Git%E5%91%BD%E4%BB%A4.md)
+ * [adb常用命令](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/adb.md)
  * [Handler原理](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Handler.md)
  * [View体系](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View.md)
  * [View事件分发和拦截](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View/ViewDispatchEvent.md)
