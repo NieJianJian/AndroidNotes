@@ -68,4 +68,5 @@
 * [LearingNotes](https://github.com/francistao/LearningNotes)
 * [一个比较好的View进阶博客](https://github.com/GcsSloop/AndroidNote)
 * [【剑指Offer学习】【所有面试题汇总】](https://blog.csdn.net/derrantcm/article/details/46887821)
+* [Android 面试宝典、数据结构和算法、音视频 (FFmpeg、AAC、x264、MediaCodec)、 C/C++ 、OpenCV、跨平台等学习记录](https://github.com/yangkun19921001/Blog)
 

@@ -319,4 +319,5 @@ Android Lint 是 SDK Tools 16（ADT 16）开始引入的一个代码扫描工具
 * [Android APP应用启动页白屏(StartingWindow)优化](https://www.cnblogs.com/whycxb/p/9312914.html)
 * [Android 性能优化(一) —— 启动优化提升60%](https://blog.csdn.net/qian520ao/article/details/81908505)
 * [如何调试Android Framework？](http://weishu.me/2016/05/30/how-to-debug-android-framework/)
+* [面试官: 说一下你做过哪些性能优化?](https://juejin.im/post/5e7f12ba518825736d2780a0)
 
