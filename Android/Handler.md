@@ -445,7 +445,64 @@ new Thread() {
 
 参考链接：[Android中为什么主线程不会因为Looper.loop()里的死循环卡死？](https://www.zhihu.com/question/34652589)
 
-**问题2：Handler导致内存泄露的路径**
+***
+
+**问题2：如何在Handler处理每条消息开始和结束都打印一条Log**？
+
+* 使用Looper的一个方法
+
+  ```java
+  private Printer mLogging;
+  public void setMessageLogging(@Nullable Printer printer) {
+      mLogging = printer;
+  }
+  ```
+
+* 在Looper的loop()方法中，每次处理消息的时候，都会进行如下判断：
+
+  ```java
+  public static void loop() {
+      ...
+      for (;;) {
+          ...
+          // This must be in a local variable, in case a UI event sets the logger
+          final Printer logging = me.mLogging;
+          if (logging != null) {
+              logging.println(">>>>> Dispatching to " + msg.target + " " +
+                      msg.callback + ": " + msg.what);
+          }
+          ...
+          try {
+              msg.target.dispatchMessage(msg);
+              dispatchEnd = needEndTime ? SystemClock.uptimeMillis() : 0;
+          } 
+          ...
+          if (logging != null) {
+              logging.println("<<<<< Finished to " + msg.target + " " + msg.callback);
+          }
+          ...
+      }
+  }
+  ```
+
+  我们可以看到，在调用Handler的dispatchMessage方法的前后，都对`logging`进行了判断，如果不为null，则打印相应的log。
+
+  所以我们只需要在代码中进行调用setMessageLogging方法并穿进去一个Printer对象即可。
+
+  ActivityThread的main方法中，就有类似的调用：
+
+  ```java
+  public static void main(String[] args) {
+      ...
+      if (false) {
+          Looper.myLooper().setMessageLogging(new LogPrinter(Log.DEBUG, "ActivityThread"));
+      }
+  }
+  ```
+
+***
+
+**问题3：Handler导致内存泄露的路径**
 
 　　Handler的声明方式一般为匿名内部类，这种情况可能会导致内存泄露。
 
@@ -466,11 +523,5 @@ new Thread() {
   * 关闭Activity的时候，调用Handler的removeCallbackAndMessage(null)方法，取消所有排队的Message。
   * 将Handler创建为静态内部类，静态内部类不会持有外部类的引用，并且使用WeakReference来包装外部类对象。当Activity想关闭销毁时，mHandler对它的弱引用没有影响，该销毁销毁；当mHandler通过WeakReference拿不到Activity对象时，说明Activity已经销毁了，就不用处理了，相当于丢弃了消息。
 
-
-
-
-
-
-
-
+***
 

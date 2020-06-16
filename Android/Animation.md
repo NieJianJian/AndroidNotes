@@ -169,7 +169,32 @@ iv_bee.startAnimation(alphaAnimation);
 * object必须要提供setAbc方法，如果动画的时候没有传递初始值，那么还要提供getAbc方法，因为系统要去取abc属性的初始值（如果不满足，直接Crash）。
 * object的setAbc对属性abc所做的改变必须能够通过某种方法反应出来，比如会带来UI的改变之类的（如果不满足，动画无效）。
 
-属性动画的有以下三个常用的类：
+首先，先将一种简单的属性动画：
+
+```java
+mImageView.animate().translationX(500);
+```
+
+View的animate()方法会返回一个ViewPropertyAnimator对象：
+
+```java
+public ViewPropertyAnimator animate() {
+    if (mAnimator == null) {
+        mAnimator = new ViewPropertyAnimator(this);
+    }
+    return mAnimator;
+}
+```
+
+ViewPropertyAnimator就是一个属性动画，对View进行了封装，然后可以调用相关的平移、旋转、缩放和透明度等方法进行操作。还可以按照如下方法设置插值器：
+
+```java
+mImageView.animate().setInterpolator(new LinearInterpolator()).translationX(500);
+```
+
+这样的方法，不需要调用start方法就可以直接启动动画，但是确定就是，只能使用ViewPropertyAnimator的内置方法，不能对其他属性进行操作。接下来就讲讲我们常用的属性动画。
+
+属性动画有以下三个常用的类：
 
 * **ValueAnimator**——属性动画的核心类
 
@@ -387,5 +412,6 @@ iv_bee.startAnimation(alphaAnimation);
        performAnimate(mButton, mButton.getWidth(), 500);
        ```
 
+### 参考文献
 
-
+1. [Android进阶之绘制 - 自定义View完全掌握系列一【HenCoder】](https://ke.qq.com/course/313640?taid=2323637436991784)

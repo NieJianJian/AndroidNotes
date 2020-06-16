@@ -4,13 +4,14 @@
 
  * [Git命令](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Git%E5%91%BD%E4%BB%A4.md)
  * [adb常用命令](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/adb.md)
- * [Handler原理](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Handler.md)
+ * [Activity生命周期](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Activity_LifeCycle.md)
+ * [Activity的启动模式以及任务栈](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/StartMode_Task.md)
  * [View体系](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View.md)
  * [View事件分发和拦截](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View/ViewDispatchEvent.md)
  * [Android动画](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Animation.md)
+ * [Handler原理](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Handler.md)
  * [Android多线程实现方式——AsyncTask、HandlerThread、IntentService](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/AndroidMultiThread.md)
  * [RecyclerView和ListView缓存机制](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/RecyclerView.md)
- * [Activity的启动模式以及任务栈](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/StartMode_Task.md)
 
 ## Java基础
 
@@ -38,11 +39,17 @@
 * [IPC机制](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/IPC.md)
 * [AIDL](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/AIDL.md)
 * [注解处理器](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/AnnotationProcessor.md)
+* [ANR](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/ANR.md)
 * [Android性能优化](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/PerformanceOptimization.md)
 * [Android内存泄露](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/MemoryLeak.md)
 * [源码分析之——OkHttp](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/OkHttp.md)
 * [源码分析之——Retrofit](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/Retrofit.md)
 * [源码分析之——ButterKnife](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/ButterKnife.md)
+
+## Android源码分析系列
+
+* [【Android源码分析】——SystemServer进程启动](https://github.com/NieJianJian/AndroidNotes/blob/master/AndroidSource/SystemServer.md)
+* [【Android源码分析】——获取View实例之LayoutInflater](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View/LayoutInflater.md)
 
 ## Android架构
 
@@ -54,6 +61,11 @@
   * [TCP和UDP](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#2-tcp和udp)
   * [HTTP](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#3-http)
   * [HttpClient和HttpURLConnection](https://github.com/NieJianJian/AndroidNotes/blob/master/NetWork/network.md#4-httpclient和httpurlconnection)
+
+## 数据结构与算法
+
+* [数据结构相关知识](https://github.com/NieJianJian/AndroidNotes/blob/master/DataStructure/datastructure.md)
+* [算法面试题](https://github.com/NieJianJian/AndroidNotes/blob/master/DataStructure/algorithm.md)
 
 ## 读书笔记
 

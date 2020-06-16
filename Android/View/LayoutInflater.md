@@ -1,5 +1,17 @@
 ## 获取View实例——LayoutInflater
 
+**注：本文基于源码Android 9.0（API 28**）
+
+### 目录
+
+1. LayoutInflater使用场景
+2. 获取LayoutInflater实例的方法和原理
+3. 通过inflate方法创建View实例
+4. inflate原理分析
+5. 拓展知识
+
+***
+
 ### 1. LayoutInflater使用场景
 
 LayoutInflater我们都用到过，比如在RecyclerView中加载一个View：
@@ -67,7 +79,7 @@ public void setContentView(int layoutResID) {
 
 在PhoneWindow的setContentView中，就调用了Layout.inflate方法。
 
-### 2. 获取LayoutInflater实例的方法和原理。
+### 2. 获取LayoutInflater实例的方法和原理
 
 获得LayoutInflater实例的方式有以下三种：
 

@@ -11,7 +11,7 @@ Binder实现了IBinder接口。
 通过[AIDL](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/AIDL.md)可以连接到Binder的工作机制，不过要注意两点：
 
 * 当客户端发起远程请求时，由于当前线程会被挂起直至服务端进程返回数据，所以如果一个远程方法是很耗时的，那么不能在UI线程中发起此远程请求。
-* 由于服务端的Binder方法运行在BInder线程池中，所以Binder方法不管是否耗时都应该采用同步的方式去处理。
+* 由于服务端的Binder方法运行在Binder线程池中，所以Binder方法不管是否耗时都应该采用同步的方式去处理。
 
 Binder的工作机制图如下：
 
@@ -44,7 +44,6 @@ ADIL文件是实现Binder的一种方式，也就是说，AIDL并不是实现Bin
   mService = IMessageBoxManager.Stub.adInterface(binder);
   binder.linkToDeath(mDeathRecipient, 0);
   ```
-
 
 ***
 

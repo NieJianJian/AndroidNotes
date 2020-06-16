@@ -158,7 +158,7 @@ Context的关联类才用了装饰模式，主要有以下的**优点**：
   ```
 
   * 注释2处创建Activity实例
-  * 注释1处创建Activity的ContextImpl，并出传入注释4处的`attach`方法中。
+  * 注释1处创建Activity的ContextImpl，并且传入注释4处的`attach`方法中。
   * 注释3处将创建的Activity实例赋值给`ContextImpl`中Context类型的成员变量`mOuterContext`，这样ContextImpl也可以访问Activity的变量和方法。
 
 * 查看`Activity`的`attach`方法，简略代码如下：

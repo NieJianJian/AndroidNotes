@@ -270,7 +270,7 @@ AIDL可以实现跨进程的方法调用，Messenger无法做到。
 
    * **asInterface**(android.os.IBinder obj)
 
-     用于将服务端的Binder对象转换程客户端所需的AIDL接口类型的对象，这种转换过程是区分进程的，如果客户端和服务端位于同一个进程，那么此方法返回的就是服务端的Stub对象本身，否则返回的是系统封装后的Stub.Proxy对象。
+     用于将服务端的Binder对象转换成客户端所需的AIDL接口类型的对象，这种转换过程是区分进程的，如果客户端和服务端位于同一个进程，那么此方法返回的就是服务端的Stub对象本身，否则返回的是系统封装后的Stub.Proxy对象。
 
    * **asBinder**
 
@@ -411,7 +411,102 @@ AIDL可以实现跨进程的方法调用，Messenger无法做到。
 
 ***
 
-### 5. AIDL权限验证
+### 5. 同进程调用和非同进程调用
+
+* onServiceConnected(ComponentName name, IBinder iBinder) 这个方法传递的IBinder接口对象是什么，在同进程与不同进程时有什么不一样？我们在该方法调用`iBinder.getClass().getName()`来打印一下`iBinder`的类型：
+
+  * 如果是同一个进程，打印结果如下：
+
+    ```java
+    com.nj.testappli.aidl.BookManagerService$1
+    ```
+
+    `BookManagerService$1`是BookManagerService的第一个内部类，其实就是`BookManagerService.Stub`类型的。
+
+  * 如果是不同的进程，打印结果如下：
+
+    ```java
+    android.os.BinderProxy
+    ```
+
+    BinderProxy类型，在native层对应一个C++的BpBinder，BpBinder最终会通过Binder驱动跟server端通信。
+
+* 系统如何区分是同进程还是非同进程？
+
+  也就是说系统如何区分`iBinder`的实际类型的？客户端在onServiceConnected方法中是如下操作的：
+
+  ```
+  IBookManager bookManager = IBookManager.Stub.asInterface(service);
+  ```
+
+  接着我们看IBookManager.Stub的asInterface方法：
+
+  ```java
+  /* Cast an IBinder object into an com.nj.testappli.aidl.IBookManager interface,
+   * generating a proxy if needed. */
+  public static com.nj.testappli.aidl.IBookManager asInterface(android.os.IBinder obj) {
+      if ((obj == null)) {
+          return null;
+      }
+      android.os.IInterface iin = obj.queryLocalInterface(DESCRIPTOR); // 1
+      if (((iin != null) && (iin instanceof com.nj.testappli.aidl.IBookManager))) {
+          return ((com.nj.testappli.aidl.IBookManager) iin); // 2
+      }
+      return new com.nj.testappli.aidl.IBookManager.Stub.Proxy(obj); // 3
+  }
+  ```
+
+  我们看到asInterface传进来的IBinder类型的参数`obj`参与后续的判断过程：
+
+  * 当非同进程时，`obj`是BinderProxy类型的，然后注释1处调用BinderProxy的queryLocalInterface方法：
+
+    ```java
+    public IInterface queryLocalInterface(String descriptor) {
+        return null;
+    }
+    ```
+
+    我们看到，BinderProxy的queryLocalInterface方法返回的是空，所以代码会走到注释3处，返回`IBookManager.Stub.Proxy`类型的实例。
+
+  * 当同进程时，`obj`是IBookManager.Stub类型的，然后注释1处调用Binder的queryLocalInterface方法：
+
+    ```java
+    public @Nullable IInterface queryLocalInterface(@NonNull String descriptor) {
+        if (mDescriptor != null && mDescriptor.equals(descriptor)) {
+            return mOwner;
+        }
+        return null;
+    }
+    ```
+
+    我们看到，返回了一个`mOwner`，那么mOwner是什么，又是什么时候赋值的？我们返回去看IBookManager.Stub的构造方法：
+
+    ```java
+    public Stub() {
+        this.attachInterface(this, DESCRIPTOR);
+    }
+    ```
+
+    Stub的构造方法中调用了attachInterface方法，由于Stub继承于Binder，所以调用的Binder的attachInterface方法：
+
+    ```java
+    private IInterface mOwner;
+    private String mDescriptor;
+    
+    public void attachInterface(@Nullable IInterface owner, @Nullable String descriptor) {
+        mOwner = owner;
+        mDescriptor = descriptor;
+    }
+    ```
+
+  所以我们得出结论：
+
+  * 如果服务端与客户端在同一个进程，那么在onServiceConnected方法得到的service就是我们在onBind中返回的类型IBookManager.Stub；
+  * 如果不是同一个进程，那得到的就是IBookManager.Stub.Proxy类型；
+
+***
+
+### 6. AIDL权限验证
 
 默认情况下，我们的远程服务任何人都可以连接，这不是我们愿意看到的。所以我们必须给服务加入权限验证功能，权限验证失败则无法访问。AIDL权限验证有两种常用方法。
 
@@ -450,7 +545,7 @@ AIDL可以实现跨进程的方法调用，Messenger无法做到。
 
 ***
 
-### 6. 其他事项
+### 7. 其他事项
 
 * 客户端调用远程服务的方法，被调用的方法运行在服务端的Binder线程池中，同时客户端线程会被挂起，这个时候如果服务端方法执行比较耗时，就会导致客户端线程长时间地阻塞，如果时UI线程，就会ANR。
 * 由于服务端的方法本身就运行在服务端的Binder线程池中，所以服务端本身可以执行大量耗时操作，这个时候切记不要在服务端方法中开线程去进行异步任务。
@@ -458,4 +553,12 @@ AIDL可以实现跨进程的方法调用，Messenger无法做到。
 * BInder是可能意外死亡的，往往由于服务端进程的意外停止，这时我们需要重新连接服务。
   * 方法一：给Binder设置DeathRecipient监听，当Binder死亡时，我们会收到binderDied方法的回调，在binderDied方法中我们可以重连远程服务。
   * 方法二：在onServiceDisconnected中重连远程服务。
+
+***
+
+### 参考文献
+
+1. [从一个例子开始分析AIDL原理](https://www.jianshu.com/p/b1ff8c0f3aec)
+2. [Binder使用](https://www.jianshu.com/p/0fff33c09f34)
+3. [Android Binder 完全解析（三）AIDL实现原理分析](https://www.jianshu.com/p/9a13f1afbc6e/)
 
