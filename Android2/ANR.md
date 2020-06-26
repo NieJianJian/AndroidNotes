@@ -35,15 +35,14 @@ static final int SERVICE_START_FOREGROUND_TIMEOUT = 10*1000;
 
 ### 2. 场景
 
-有以下四种场景：
+ANR 的四种场景：
 
- （1）Service Timeout：Service在特定的时间内无法处理完成；
+1. Service TimeOut:  service 未在规定时间执行完成；前台服务 20s，后台 200s
+2. BroadCastQueue TimeOut: 未在规定时间内未处理完广播；前台广播 10s 内, 后台 60s 内
+3. ContentProvider TimeOut:  publish 在 10s 内没有完成
+4. Input Dispatching timeout:  5s 内未响应键盘输入、触摸屏幕等事件
 
- （2）BroadcastQueue Timeout：BroadcastReceiver在特定时间内无法处理完成
-
- （3）ContentProvider Timeout：内容提供者执行超时
-
- （4）inputDispatching Timeout: 按键或触摸事件在特定时间内无响应。
+我们可以看到，Activity 的生命周期回调的阻塞并不在触发 ANR 的场景里面，所以并不会直接触发 ANR。只不过死循环阻塞了主线程，如果系统再有上述的四种事件发生，就无法在相应的时间内处理从而触发 ANR。
 
 最终会通过AppErrors调用AppNotRespondingDialog.show()来弹出对话框。
 

@@ -119,9 +119,11 @@ protected void onCreate(Bundle savedInstanceState) {
 
 ### Memory Profiler
 
-[使用 Memory Profiler 查看 Java 堆和内存分配](https://developer.android.google.cn/studio/profile/memory-profiler?hl=zh_cn)
+1. [使用 Memory Profiler 查看 Java 堆和内存分配](https://developer.android.google.cn/studio/profile/memory-profiler?hl=zh_cn)
 
-[Profiler入门系列（一）——内存分析](https://www.jianshu.com/p/ff2d7c5f043b)
+2. [Profiler入门系列（一）——内存分析](https://www.jianshu.com/p/ff2d7c5f043b)
+
+3. [使用 Android Studio Profiler 工具解析应用的内存和 CPU 使用数据](https://mp.weixin.qq.com/s/UNhj37vvu-Ake7hIAB6VSw)
 
 ### LeakCanary
 
