@@ -71,6 +71,7 @@
 
 * [深入理解Java虚拟机-JVM高级特性与最佳实践](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book1/README.md)
 * [深入探索Android热修复技术原理](https://github.com/NieJianJian/AndroidNotes/blob/master/ReadingNotes/Book2/README.md)
+* [Java并发编程的艺术]()
 * [Android进阶解密](https://github.com/NieJianJian/AndroidNotes/tree/master/ReadingNotes/Book3/README.md)
 * [Android进阶之光](https://github.com/NieJianJian/AndroidNotes/tree/master/ReadingNotes/Book4/README.md)
 
