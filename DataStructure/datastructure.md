@@ -1,6 +1,20 @@
 ## 数据结构相关知识
 
-### 1. DFS和BFS
+### 1. 时间复杂度
+
+1. 时间复杂度
+   * 常量阶 O(1)
+   * 对数阶 O(logn)
+   * 线性阶 O(n)
+   * 线性对数阶 O(nlogn)
+   * 平方阶 O(n<sup>2</sup>)、O(n<sup>3</sup>) ... O(n<sup>k</sup>)
+   * 指数阶 O(2<sup>n</sup>)
+   * 阶乘阶 O(n!)
+2. 
+
+
+
+### 2. DFS和BFS
 
 DFS（Depth First Search）深度优先搜索。
 
@@ -15,7 +29,7 @@ BFS（Breadth First Search）广度优先搜索。
 
 ***
 
-### 2. 动态规划
+### 3. 动态规划
 
 
 
