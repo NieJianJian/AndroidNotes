@@ -14,5 +14,5 @@
  * [源码——理解MeasureSpec](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View/MeasureSpec.md)
  * [源码——获取View实例之LayoutInflater](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View/LayoutInflater.md)
  * [源码——LayoutInflater.Factory讲解](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View/LayoutInflater_Factory.md)
- * [源码——requestLayout、invalidate](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View/View_requestLayout.md)
+ * [源码——requestLayout、invalidate、postInvalidate](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/View/View_requestLayout.md)
 

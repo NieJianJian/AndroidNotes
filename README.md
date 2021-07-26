@@ -24,6 +24,7 @@
   * [Java并发三大特性](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaConcurrent.md)
   * [生产者-消费者模型](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/ProducerConsumer.md)
   * [ThreadLocal详解](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/ThreadLocal.md)
+  * [锁相关知识](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaLock.md)
 * [JVM（JAVA虚拟机）]()
   * [JMM（Java内存模型）](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JMM.md)
 * [Java集合类](https://github.com/NieJianJian/AndroidNotes/blob/master/Java/JavaCollection.md)
