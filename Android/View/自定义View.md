@@ -36,3 +36,4 @@
 
 5. View带有滑动嵌套，需要处理滑动冲突
 
+6. ViewGroup的`WILL_NOT_DRAW`标志位默认是true，如果想要重写draw方法，就需要手动关闭标志位`setWillNotDraw(false)`

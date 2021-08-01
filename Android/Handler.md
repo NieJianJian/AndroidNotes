@@ -433,6 +433,12 @@ new Thread() {
 }.start();
 ```
 
+### 5. 消息屏障
+
+[Android 消息屏障与异步消息](https://www.jianshu.com/p/ea4a683e717e)
+
+[Android Handler 机制（四）：屏障消息（同步屏障）](https://www.cnblogs.com/renhui/p/12875589.html)
+
 ***
 
 ***

@@ -115,6 +115,10 @@ protected void onCreate(Bundle savedInstanceState) {
 
 造成内存泄露的原因：[WebView造成的内存泄露](https://blog.csdn.net/anhenzhufeng/article/details/80312134)。
 
+### 7. 拓展
+
+1. [抖音 Android 性能优化系列：Java 内存优化篇](https://blog.csdn.net/ByteDanceTech/article/details/111503373?spm=1001.2014.3001.5501)
+
 ***
 
 ### Memory Profiler
