@@ -164,6 +164,77 @@
 
 ***
 
+
+
+## 反编译
+
+* 反编译
+
+  ```
+  apktool d [apk路径]
+  ```
+
+* 反打包
+
+  ```
+  apktool b [反编译后的文件目录]
+  ```
+
+* dex转jar
+
+  ```
+  chmod +x d2j-dex2jar.sh
+  ```
+
+  ```
+  d2j-dex2jar.sh [classes.dex路径]
+  sudo sh d2j-dex2jar.sh [classes.dex路径]
+  ```
+
+  * d2j-dex2jar.sh: line 36: ./d2j_invoke.sh: Permission denied 异常
+
+    ```
+    sudo chmod 777 d2j_invoke.sh
+    ```
+
+  生成 `classes-dex2jar.jar 文件
+
+* 使用 *jd-gui* 打开 *jar* 文件
+
+  如果拖拽进去报错如下：
+
+  ```
+  invalid input filefolder...
+  ```
+
+  权限问题导致，使用如下命令，再重新拖拽进去即可
+
+  ```
+  sudo chmod +xr classes-dex2jar.jar
+  ```
+
+  
+
+* [Mac 环境下反编译 android apk 的实现](https://www.jianshu.com/p/92a3adc1b152)
+
+* [Mac下反编译apk与浅谈Android应用安全](https://www.jianshu.com/p/84f5fb1f1562?open_source=weibo_search)
+
+***
+
+
+
+## java命令
+
+* java转汇编
+
+  ```
+  java -XX:+UnlockDiagnosticVMOptions -XX:+PrintAssembly -Xcomp JavaToAsm.java > JavaToAsm.asm
+  ```
+
+  
+
+***
+
 ### 参考文献
 
 1. [ ADB 用法大全](https://github.com/mzlogin/awesome-adb)
