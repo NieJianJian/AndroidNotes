@@ -37,7 +37,7 @@
 ## Android进阶
 
 * [64K问题(MultiDex 分包)](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/64K问题-MultiDex分包.md)
-* [APK](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/APK.md)
+* [APK构建过程](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/APK.md)
 * [IPC机制](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/IPC.md)
 * [AIDL](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/AIDL.md)
 * [注解处理器](https://github.com/NieJianJian/AndroidNotes/blob/master/Android2/AnnotationProcessor.md)

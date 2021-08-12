@@ -81,10 +81,9 @@
 * 查看系统安装应用的包名列表
 
   ```java
-  adb shell
-  pm list packages
+  adb shell pm list packages
   ```
-
+  
 * 查看某应用的apk安装地址
 
   ```
@@ -119,17 +118,49 @@
 
   `WaitTime`是`TotalTime`加上应用进程创建过程的耗时。
 
+* 查看top activity
+
+  ```java
+  adb shell dumpsys activity top | grep ACTIVITY
+  ```
+
 * 查看当前运行的app
 
   ```
   adb shell dumpsys window windows | grep mFocusedApp
   ```
 
-  
+* 查看应用内存分配
 
+  ```
+  adb shell dumpsys meminfo [包名]
+  ```
 
+* 查看瞬时cpu
 
+  ```
+  adb shell top
+  ```
 
+  [adb shell top 监控内存和CPU](https://blog.csdn.net/u010144805/article/details/79152837)
+
+* 根据包名查看程序运行的进程信息
+
+  ```
+  adb shell ps | grep [packageNdame]
+  adb shell ps | grep com.qx.yue.special
+  ```
+
+* 查看apk签名
+
+  ```java
+  keytool -list -printcert -jarfile D:\GoogleNewTest\sdkgoogle.apk
+
+* 拉取anr日志
+
+  ```
+  adb pull /data/anr
+  adb bugreport ./bugreport.zip
 
 ***
 

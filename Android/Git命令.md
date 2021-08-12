@@ -1,5 +1,7 @@
 ## Git命令
 
+[另一篇git命令文章——Git2](https://github.com/NieJianJian/AndroidNotes/blob/master/Android/Git2.md)
+
 • 创建本地仓库
 
 ```git init
@@ -173,7 +175,7 @@ cat ~/.ssh/id_rsa.pub
 
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0X6L1zLL4VHuvGb8aJH3ippTozmReSUzgntvk434aJ/v7kOdJ/MTyBlWXFCR+HAo3FXRitBqxiX1nKhXpHAZsMciLq8vR3c8E7CjZN733f5AL8uEYJA+YZevY5UCvEg+umT7PHghKYaJwaCxV7sjYP7Z6V79OMCEAGDNXC26IBMdMgOluQjp6o6j2KAdtRBdCDS/QIU5THQDxJ9lBXjk1fiq9tITo/aXBvjZeD+gH/Apkh/0GbO8VQLiYYmNfqqAHHeXdltORn8N7C9lOa/UW3KM7QdXo6J0GFlBVQeTE/IGqhMS5PMln3 admin@admin-PC
 
-5.将公钥添加到GitHub上
+5.将公钥添加到GitHugit命令.mdb上
 1).登陆你的github帐户。点击你的头像，然后 Settings -> 左栏点击 SSH and GPG keys -> 点击 New SSH key
 2).然后你复制上面的公钥内容，粘贴进“Key”文本域内。 title域，自己随便起个名字。
 3).点击 Add key。
@@ -189,6 +191,4 @@ Hi NieJianJian! You've successfully authenticated, but GitHub does not provide s
 [Mac通过Terminal来使用Github](https://www.jianshu.com/p/2a8559bffc1a)
 
 [利用git把本地项目传到github+将github中已有项目从本地上传更新](https://www.cnblogs.com/cing/p/7742215.html)
-
-• 
 
